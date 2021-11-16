@@ -120,7 +120,7 @@ albedo_pixel albedo_ps(
 	
 	// compute parallax
 	float2 texcoord;
-	calc_parallax_ps(vsout.texcoord, view_dir_in_tangent_space, texcoord);
+	calc_parallax_ps(vsout.texcoord, tangent_frame, view_dir, view_dir_in_tangent_space, texcoord);
 
 	float output_alpha;
 	// do alpha test
@@ -178,7 +178,7 @@ float4 calc_output_color_with_explicit_light_quadratic(
 	
 	// compute parallax
 	float2 texcoord;
-	calc_parallax_ps(original_texcoord.xy, view_dir_in_tangent_space, texcoord);
+	calc_parallax_ps(original_texcoord.xy, tangent_frame, view_dir, view_dir_in_tangent_space, texcoord);
 
 	float output_alpha;
 	// do alpha test
@@ -293,7 +293,7 @@ float4 calc_output_color_with_explicit_light_linear_with_dominant_light(
 	
 	// compute parallax
 	float2 texcoord;
-	calc_parallax_ps(original_texcoord.xy, view_dir_in_tangent_space, texcoord);
+	calc_parallax_ps(original_texcoord.xy, tangent_frame, view_dir, view_dir_in_tangent_space, texcoord);
 
 	float output_alpha;
 	// do alpha test
@@ -1289,7 +1289,7 @@ accum_pixel default_dynamic_light_ps(
 	
 	// compute parallax
 	float2 texcoord;
-	calc_parallax_ps(vsout.texcoord.xy, view_dir_in_tangent_space, texcoord);
+	calc_parallax_ps(vsout.texcoord, tangent_frame, view_dir, view_dir_in_tangent_space, texcoord);
 
 	float output_alpha;
 	// do alpha test

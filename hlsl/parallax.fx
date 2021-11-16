@@ -6,6 +6,8 @@ PARAM(float4, height_map_xform);
 
 void calc_parallax_off_ps(
 	in float2 texcoord,
+	in float3x3 tangent_frame,
+	in float3 view_dir_world_space,
 	in float3 view_dir,					// direction towards camera
 	out float2 parallax_texcoord)
 {
@@ -14,6 +16,8 @@ void calc_parallax_off_ps(
 
 void calc_parallax_simple_ps(
 	in float2 texcoord,
+	in float3x3 tangent_frame,
+	in float3 view_dir_world_space,
 	in float3 view_dir,					// direction towards camera
 	out float2 parallax_texcoord)
 {
@@ -26,6 +30,8 @@ void calc_parallax_simple_ps(
 
 void calc_parallax_two_sample_ps(
 	in float2 texcoord,
+	in float3x3 tangent_frame,
+	in float3 view_dir_world_space,
 	in float3 view_dir,					// direction towards camera
 	out float2 parallax_texcoord)
 {
@@ -41,11 +47,12 @@ void calc_parallax_two_sample_ps(
 	
 	/// height= height + height_difference * view_dir.z;
 	parallax_texcoord= (parallax_texcoord - height_map_xform.zw) / height_map_xform.xy;
-
 }
 
 void calc_parallax_interpolated_ps(
 	in float2 texcoord,
+	in float3x3 tangent_frame,
+	in float3 view_dir_world_space,
 	in float3 view_dir,					// direction towards camera
 	out float2 parallax_texcoord)
 {
@@ -76,23 +83,46 @@ void calc_parallax_interpolated_ps(
 	parallax_texcoord= (parallax_texcoord - height_map_xform.zw) / height_map_xform.xy;
 }
 
-void calc_parallax_three_sample_ps()
+PARAM(int, height_linear_steps);
+PARAM(int, height_binary_steps);
+
+void calc_parallax_relief_ps(
+	in float2 texcoord,
+	in float3x3 tangent_frame,
+	in float3 view_dir_world_space,
+	in float3 view_dir,					// direction towards camera
+	out float2 parallax_texcoord)
 {
-/*	
-	parallax_texcoord= texcoord * height_map_xform.xy + height_map_xform.zw;
+	texcoord= transform_texcoord(texcoord, height_map_xform);
+	float glancing_scale = dot(view_dir_world_space, tangent_frame[2]);
+	float2 ds = view_dir.xy * (height_scale * glancing_scale) / view_dir.z;
+	ds = -ds;
 
-	float height= 0.0f;
-	float height_difference= (sample2D(height_map, parallax_texcoord).g - 0.5f) * height_scale - height;
-	parallax_texcoord= texcoord + height_difference * view_dir.xy;
+	float depth_step = 1.0 / height_linear_steps;
+	
+	float size = depth_step;
+	float depth = 1.0;
+	float best_depth = 1.0;
+	
+	for (int steps = 0; steps < height_linear_steps - 1; steps++) {
+			depth -= size;
+			float t = sample2D(height_map, texcoord + ds * depth).g;
+			if (depth >= 1.0 - t)
+					best_depth = depth;
+	}
+	depth = best_depth - size;
+	for (int steps = 0; steps < height_binary_steps; steps++) {
+			size *= 0.5;
+			float t = sample2D(height_map, texcoord + ds * depth).g;
+			if (depth >= 1.0 - t) {
+					best_depth = depth;
+					depth -= 2 * size;
+			}
+			depth += size;
+	}
 
-	height= height + height_difference * view_dir.z;
-	height_difference= (sample2D(height_map, parallax_texcoord).g - 0.5f) * height_scale - height;
-	parallax_texcoord= parallax_texcoord + height_difference * view_dir.xy;
-
-	height= height + height_difference * view_dir.z;
-	height_difference= (sample2D(height_map, parallax_texcoord).g - 0.5f) * height_scale - height;
-	parallax_texcoord= parallax_texcoord + height_difference * view_dir.xy;
-*/
+	parallax_texcoord= texcoord + best_depth * ds;
+	parallax_texcoord= (parallax_texcoord - height_map_xform.zw) / height_map_xform.xy;
 }
 
 PARAM_SAMPLER_2D(height_scale_map);
@@ -100,6 +130,8 @@ PARAM(float4, height_scale_map_xform);
 
 void calc_parallax_simple_detail_ps(
 	in float2 texcoord,
+	in float3x3 tangent_frame,
+	in float3 view_dir_world_space,
 	in float3 view_dir,					// direction towards camera
 	out float2 parallax_texcoord)
 {
@@ -110,3 +142,16 @@ void calc_parallax_simple_detail_ps(
 	parallax_texcoord= (parallax_texcoord - height_map_xform.zw) / height_map_xform.xy;
 }
 
+PARAM(int, interior_map_rows);
+PARAM(int, interior_map_cols);
+
+void calc_parallax_interior_mapping_ps(
+	in float2 texcoord,
+	in float3x3 tangent_frame,
+	in float3 view_dir_world_space,
+	in float3 view_dir,					// direction towards camera
+	out float2 parallax_texcoord)
+{
+	// sorry nothing
+	parallax_texcoord= texcoord;
+}
