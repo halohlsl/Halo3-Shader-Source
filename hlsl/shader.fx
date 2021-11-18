@@ -20,6 +20,7 @@
 
 #include "misc_attr_animation.fx"
 #include "albedo.fx"
+#include "albedo_custom.fx"
 #include "parallax.fx"
 #include "bump_mapping.fx"
 #include "self_illumination.fx"
@@ -28,6 +29,7 @@
 #include "environment_mapping.fx"
 #include "atmosphere.fx"
 #include "alpha_test.fx"
+#include "alpha_test_custom.fx"
 
 // any bloom overrides must be #defined before #including render_target.fx
 #include "render_target.fx"
