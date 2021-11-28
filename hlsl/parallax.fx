@@ -95,12 +95,9 @@ void calc_parallax_relief_ps(
 {
 	texcoord= transform_texcoord(texcoord, height_map_xform);
 	float glancing_scale = dot(view_dir_world_space, tangent_frame[2]);
-	float2 ds = view_dir.xy * (height_scale * glancing_scale) / view_dir.z;
-	ds = -ds;
+	float2 ds = -view_dir.xy * (height_scale * glancing_scale) / view_dir.z;
 
-	float depth_step = 1.0 / height_linear_steps;
-	
-	float size = depth_step;
+	float size = 1.0 / height_linear_steps;
 	float depth = 1.0;
 	float best_depth = 1.0;
 	
