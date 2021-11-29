@@ -6,4 +6,4 @@ These source files are needed to compile shaders using tool. Clone the repo into
 
 Use the compile-shaders verb with tool to write new .vertex_shader and .pixel_shader files.
 
-Don't use tool_fast! It links the shader compiler library statically, ruining everything. Please go nag num about it.
+https://discord.gg/aKQCDmQjYN
