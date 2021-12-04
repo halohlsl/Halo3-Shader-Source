@@ -30,6 +30,8 @@
 #include "atmosphere.fx"
 #include "decorators.h"
 
+#include "common.fx"
+
 // decorator shader is defined as 'world' vertex type, even though it really doesn't have a vertex type - it does its own custom vertex fetches
 //@generate decorator
 
@@ -49,6 +51,13 @@
 
 LOCAL_SAMPLER_2D(diffuse_texture, 0);			// pixel shader
 
+void calc_alpha_test_decorator_fuzzy_ps(
+	in float2 fragment_position,
+	inout float alpha)
+{
+	alpha-= rand2(fragment_position) * (1 - alpha);
+	clip(alpha- k_decorator_alpha_test_threshold);
+}
 
 #ifdef DECORATOR_EDIT
 
@@ -92,7 +101,7 @@ accum_pixel default_ps(
 //#define selection_color p_lighting_constant_3
 
 	float4 diffuse_albedo= sample2D(diffuse_texture, texcoord);
-	clip(diffuse_albedo.a - k_decorator_alpha_test_threshold);				// alpha test
+	calc_alpha_test_decorator_fuzzy_ps(screen_position, diffuse_albedo.a);	// alpha test
 	
 	float4 color= diffuse_albedo * pc_ambient_light * g_exposure.rrrr;
 
@@ -306,7 +315,6 @@ void default_vs(
 
 #endif // VERTEX_SHADER
 
-
 // ***************************************
 // WARNING   WARNING   WARNING
 // ***************************************
@@ -346,8 +354,8 @@ default_ps(
 	
 	float4 color= texcoord * light + inscatter;
 
-#if DX_VERSION == 11	
-	clip(color.a - k_decorator_alpha_test_threshold);								// alpha clip on D3D11
+#if DX_VERSION == 11		
+	calc_alpha_test_decorator_fuzzy_ps(screen_position, color.a); // alpha clip on D3D11
 #endif
 
 	color.rgb *= g_exposure.rrr;
