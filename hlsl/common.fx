@@ -9,6 +9,8 @@ PARAM(bool, use_soft_z);
 PARAM(float, soft_z_range);
 PARAM(float4, screen_params);
 
+float rand2(float2 n) { return frac(sin(dot(n, float2(12.9898, 4.1414))) * 43758.5453); }
+
 float2 z_to_w_coeffs()
 {
 	const float zf = 0.007812500f;
@@ -87,5 +89,16 @@ void apply_soft_fade_on(inout float4 albedo, in float3 wnorm, in float3 wview,
 #endif
 }
 
+void apply_soft_fade_fuzzy(inout float4 albedo, in float3 wnorm, in float3 wview,
+	in float linearDepth, in float2 vPos)
+{
+	float val = rand2(vPos);
+	
+#if BLEND_MODE(alpha_blend)
+	albedo.w -= val * (1 - albedo.w);
+#else
+	albedo.rgb *= val;
+#endif
+}
 
 #endif

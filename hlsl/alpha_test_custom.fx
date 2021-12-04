@@ -4,6 +4,7 @@ PARAM(float4, multiply_map_xform);
 
 void calc_alpha_test_multiply_map_ps(
 	in float2 texcoord,
+	in float2 fragment_position,
 	out float output_alpha)
 {
 

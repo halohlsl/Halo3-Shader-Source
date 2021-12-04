@@ -34,7 +34,7 @@ float4 shadow_generate_ps(
 {
 	float output_alpha;
 	// do alpha test
-	calc_alpha_test_ps(texcoord, output_alpha);
+	calc_alpha_test_ps(texcoord, screen_position, output_alpha);
 
 	float alpha= 1.0f;
 #ifndef NO_ALPHA_TO_COVERAGE
@@ -55,7 +55,7 @@ void shadow_generate_ps(
 {
 	float output_alpha;
 	// do alpha test
-	calc_alpha_test_ps(texcoord, output_alpha);
+	calc_alpha_test_ps(texcoord, screen_position, output_alpha);
 	clip(output_alpha - 0.5);
 }
 #endif
@@ -176,7 +176,7 @@ accum_pixel shadow_apply_ps(
 {
 	float output_alpha;
 	// do alpha test
-	calc_alpha_test_ps(texcoord, output_alpha);
+	calc_alpha_test_ps(texcoord, screen_position, output_alpha);
 
 	// transform position by shadow projection
 //	float3 fragment_shadow_position; // = transform_point(world_position, shadow_projection_1);

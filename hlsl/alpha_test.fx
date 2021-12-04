@@ -1,25 +1,19 @@
 #include "entry.fx"
+#include "common.fx"
 
 PARAM_SAMPLER_2D(alpha_test_map);
 PARAM(float4, alpha_test_map_xform);
 
 void calc_alpha_test_off_ps(
 	in float2 texcoord,
+	in float2 fragment_position,
 	out float output_alpha)
 {
 	output_alpha = 1.0;
 }
 
-
-
-
-void calc_alpha_test_on_ps(
-	in float2 texcoord,
-	out float output_alpha)
+void perform_alpha_clip(float alpha)
 {
-	float alpha= sample2D(alpha_test_map, transform_texcoord(texcoord, alpha_test_map_xform)).a;
-	output_alpha= alpha;
-
 #if ENTRY_POINT(entry_point) == ENTRY_POINT_shadow_generate
 
 	clip(alpha-0.5f);			// always on for shadow
@@ -48,3 +42,24 @@ void calc_alpha_test_on_ps(
 #endif
 }
 
+
+void calc_alpha_test_on_ps(
+	in float2 texcoord,
+	in float2 fragment_position,
+	out float output_alpha)
+{
+	float alpha= sample2D(alpha_test_map, transform_texcoord(texcoord, alpha_test_map_xform)).a;
+	output_alpha= alpha;
+	perform_alpha_clip(alpha);
+}
+
+void calc_alpha_test_fuzzy_ps(
+	in float2 texcoord,
+	in float2 fragment_position,
+	out float output_alpha)
+{
+	float alpha= sample2D(alpha_test_map, transform_texcoord(texcoord, alpha_test_map_xform)).a;
+	alpha-= rand2(fragment_position) * (1 - alpha);
+	output_alpha= alpha;
+	perform_alpha_clip(alpha);
+}

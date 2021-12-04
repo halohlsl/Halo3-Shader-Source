@@ -73,7 +73,7 @@ void apply_pc_albedo_modifier(
 }
 
 
-void calc_alpha_test_ps(in float2 texcoord, out float output_alpha)
+void calc_alpha_test_ps(in float2 texcoord, in float2 screen_position, out float output_alpha)
 {
 	output_alpha = 1.0f;
 }

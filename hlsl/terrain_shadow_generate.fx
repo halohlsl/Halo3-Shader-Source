@@ -9,6 +9,7 @@ void calc_bumpmap_ps(
 
 void calc_alpha_test_ps(
 	in float2 texcoord,
+	in float2 screen_position,
 	out float output_alpha)
 {
 	output_alpha = 1.0f;

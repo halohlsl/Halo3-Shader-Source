@@ -196,7 +196,7 @@ albedo_pixel albedo_ps(
 #endif
 	float output_alpha;
 	// do alpha test
-	calc_alpha_test_ps(vsout.texcoord, output_alpha);
+	calc_alpha_test_ps(vsout.texcoord, vsout.position, output_alpha);
 		
 	float4 albedo;
 	calc_albedo_ps(vsout.texcoord, albedo, vsout.normal.xyz, misc);
@@ -273,7 +273,7 @@ accum_pixel static_common_ps(
 	
 	float output_alpha;
 	// do alpha test
-	calc_alpha_test_ps(vsout.texcoord, output_alpha);
+	calc_alpha_test_ps(vsout.texcoord, vsout.position, output_alpha);
 
 	float4 out_color;
 	float4 albedo = get_albedo(vsout.position);

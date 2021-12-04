@@ -151,7 +151,7 @@ float4 calc_output_color_with_explicit_light_quadratic(
 	
 	float output_alpha;
 	// do alpha test
-	calc_alpha_test_ps(texcoord, output_alpha);
+	calc_alpha_test_ps(texcoord, fragment_position, output_alpha);
 
 	// get diffuse albedo, specular mask and bump normal
 	float3 bump_normal;
@@ -668,7 +668,7 @@ albedo_pixel albedo_ps(
 #endif
 	float output_alpha;
 	// do alpha test
-	calc_alpha_test_ps(vsout.texcoord, output_alpha);
+	calc_alpha_test_ps(vsout.texcoord, vsout.position, output_alpha);
 
 	float4 base = sample2D(base_map, transform_texcoord(vsout.texcoord, base_map_xform)) * albedo_color;
 	return convert_to_albedo_target(base, vsout.normal.xyz, vsout.normal.w);

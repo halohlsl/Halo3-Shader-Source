@@ -124,7 +124,7 @@ albedo_pixel albedo_ps(
 
 	float output_alpha;
 	// do alpha test
-	calc_alpha_test_ps(texcoord, output_alpha);
+	calc_alpha_test_ps(texcoord, vsout.position, output_alpha);
 	
    	// compute the bump normal in world_space
 	float3 bump_normal;
@@ -182,7 +182,7 @@ float4 calc_output_color_with_explicit_light_quadratic(
 
 	float output_alpha;
 	// do alpha test
-	calc_alpha_test_ps(texcoord, output_alpha);
+	calc_alpha_test_ps(texcoord, fragment_position, output_alpha);
 
 	// get diffuse albedo, specular mask and bump normal
 	float3 bump_normal;
@@ -297,7 +297,7 @@ float4 calc_output_color_with_explicit_light_linear_with_dominant_light(
 
 	float output_alpha;
 	// do alpha test
-	calc_alpha_test_ps(texcoord, output_alpha);
+	calc_alpha_test_ps(texcoord, fragment_position, output_alpha);
 
 	// get diffuse albedo, specular mask and bump normal
 	float3 bump_normal;
@@ -849,7 +849,7 @@ accum_pixel static_per_vertex_color_ps(
 
 	float output_alpha;
 	// do alpha test
-	calc_alpha_test_ps(vsout.texcoord.xy, output_alpha);
+	calc_alpha_test_ps(vsout.texcoord.xy, vsout.position, output_alpha);
 	
 	// get diffuse albedo, specular mask and bump normal
 	float4 albedo;	
@@ -1293,7 +1293,7 @@ accum_pixel default_dynamic_light_ps(
 
 	float output_alpha;
 	// do alpha test
-	calc_alpha_test_ps(texcoord, output_alpha);
+	calc_alpha_test_ps(texcoord, vsout.position.xy, output_alpha);
 
 	// calculate simple light falloff for expensive light
 	float3 fragment_position_world = Camera_Position_PS - vsout.fragment_to_camera_world;
