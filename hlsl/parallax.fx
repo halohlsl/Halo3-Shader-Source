@@ -95,9 +95,9 @@ float gib_relief_sample(
 	in texture_sampler_2d height_sampler,
 	in float2 texcoord)
 {
-	if (height_sample_decal)
+	/*if (height_sample_decal)
 		return 1.0 - sample2D(alpha_map, texcoord).w;
-	else if (height_sample_halo3)
+	else*/ if (height_sample_halo3)
 		return min(sample2D(height_sampler, texcoord).g, 0.5) * 2;
 	else
 		return sample2D(height_sampler, texcoord).g;

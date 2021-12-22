@@ -24,7 +24,7 @@ struct SSAO_VS_OUTPUT
 
 SSAO_VS_OUTPUT default_vs(vertex_type IN)
 {
-	SSAO_VS_OUTPUT   res;
+	SSAO_VS_OUTPUT	res;
 	
 	res.hpos.xy = IN.position;
 	res.hpos.z  = 0.5f;
@@ -54,17 +54,21 @@ float3 normal_from_depth(float depth, float2 texcoords)
 	return normalize(-cross(p1, p2));
 }
 
+#define SSAO_INTENSITY SSAO_PARAMS.w
+#define SSAO_RADIUS SSAO_PARAMS.r
+
 float4 default_ps(SSAO_VS_OUTPUT input) : SV_Target
 {
 	float depth= sample2D(depth_sampler, input.texCoord.xy).r;
 	float3 normal= normal_from_depth(depth, input.texCoord.xy);
 	
-	const float area = 0.0075;
-	const float falloff = 0.00000001;
-	const float radius = 0.0002;
+	const float base= 0.0;
+	const float area= 0.0075;
+	const float falloff= 0.00000001;
 	
-	const int samples = 16;
-	float3 sample_sphere[samples] = {
+	const int samples= 16;
+	float3 sample_sphere[samples]=
+	{
 		float3( 0.5381, 0.1856,-0.4319), float3( 0.1379, 0.2486, 0.4430),
 		float3( 0.3371, 0.5679,-0.0057), float3(-0.6999,-0.0451,-0.0019),
 		float3( 0.0689,-0.1598,-0.8547), float3( 0.0560, 0.0069,-0.1843),
@@ -75,21 +79,20 @@ float4 default_ps(SSAO_VS_OUTPUT input) : SV_Target
 		float3( 0.0352,-0.0631, 0.5460), float3(-0.4776, 0.2847,-0.0271)
 	};
 	
-	float3 random = normalize( sample2D(noise_sampler, input.texCoord.zw).rgb );
-	float3 position = float3(input.texCoord.xy, depth);
+	float3 random= normalize(sample2D(noise_sampler, input.texCoord.zw).rgb);
+	float3 position= float3(input.texCoord.xy, depth);
 	
-	float radius_depth = radius/depth;
-	float occlusion = 0.0;
-	for(int i=0; i < samples; i++) {
-	
-		float3 ray = radius_depth * reflect(sample_sphere[i], random);
-		float3 hemi_ray = position + sign(dot(ray,normal)) * ray;
+	float occlusion= 0.0;
+	for (int i=0; i < samples; i++)
+	{
+		float3 ray= (SSAO_RADIUS/depth) * reflect(sample_sphere[i], random);
+		float3 hemi_ray= position + sign(dot(ray,normal)) * ray;
 		
-		float occ_depth = sample2D(depth_sampler, saturate(hemi_ray.xy)).r;
-		float difference = depth - occ_depth;
+		float occ_depth= sample2D(depth_sampler, saturate(hemi_ray.xy)).r;
+		float difference= depth - occ_depth;
 		
-		occlusion += step(falloff, difference) * (1.0-smoothstep(falloff, area, difference));
+		occlusion+= step(falloff, difference) * (1.0-smoothstep(falloff, area, difference));
 	}
 	
-	return SSAO_PARAMS.w * occlusion * (1.0 / samples);
+	return pow(saturate((occlusion * (1.0 / samples)) + base), SSAO_INTENSITY);
 }

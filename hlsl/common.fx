@@ -9,7 +9,24 @@ PARAM(bool, use_soft_z);
 PARAM(float, soft_z_range);
 PARAM(float4, screen_params);
 
-float rand2(float2 n) { return frac(sin(dot(n, float2(12.9898, 4.1414))) * 43758.5453); }
+// https://gist.github.com/h3r/3a92295517b2bee8a82c1de1456431dc
+
+float rand1(float n)  { return frac(sin(n) * 43758.5453123); }
+float rand2(float2 n) { return frac(sin(dot(n, float2(12.9898, 4.1414))) * 43758.5453123); }
+
+//--------------------------------------------------------------------------------------
+// fracional Brownian motion https://en.wikipedia.org/wiki/fracional_Brownian_motion
+//--------------------------------------------------------------------------------------
+//	<https://www.shadertoy.com/view/Xd23Dh>
+//	by inigo quilez <http://iquilezles.org/www/articles/voronoise/voronoise.htm>
+//
+
+float3 hash3( float2 p ){
+    	float3 q = float3( dot(p,float2(127.1,311.7)), 
+			   dot(p,float2(269.5,183.3)), 
+			   dot(p,float2(419.2,371.9)) );
+	return frac(sin(q)*43758.5453);
+}
 
 float2 z_to_w_coeffs()
 {

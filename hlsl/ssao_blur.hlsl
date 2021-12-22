@@ -37,10 +37,8 @@ float sampleDiag(in half4 sm_mask, in float depth,
 
 float4 default_ps(SCREEN_POSITION_INPUT(screen_position), in float2 texcoord : TEXCOORD0) : SV_Target
 {
-   float ssao = sample2D(ssao_sampler, texcoord).r;
-
+   float ssao= sample2D(ssao_sampler, texcoord).r;
    float depth = sample2D(depth_sampler, texcoord).r;
-
 
    float diagXY0 = sampleDiag(ssao, depth, texcoord,
               float2(-1.0, -1.0),
