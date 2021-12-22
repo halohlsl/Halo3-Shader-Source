@@ -9,10 +9,6 @@
 LOCAL_SAMPLER_2D(depth_sampler, 0);
 LOCAL_SAMPLER_2D(ssao_sampler, 1);
 
-
-
-
-
 float sampleDiag(in half4 sm_mask, in float depth,
                  in float2 texC, in float2 texC0, in float2 texC1)
 {
@@ -39,12 +35,9 @@ float sampleDiag(in half4 sm_mask, in float depth,
    return ret;
 }
 
-
-
 float4 default_ps(SCREEN_POSITION_INPUT(screen_position), in float2 texcoord : TEXCOORD0) : SV_Target
 {
    float ssao = sample2D(ssao_sampler, texcoord).r;
-   //return ssao * ssao;
 
    float depth = sample2D(depth_sampler, texcoord).r;
 

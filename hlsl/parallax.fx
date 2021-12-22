@@ -86,6 +86,7 @@ void calc_parallax_interpolated_ps(
 PARAM(int, height_linear_steps);
 PARAM(int, height_binary_steps);
 PARAM(bool, height_sample_halo3);
+PARAM(bool, height_sample_decal);
 
 PARAM_SAMPLER_2D(height_scale_map);
 PARAM(float4, height_scale_map_xform);
@@ -94,7 +95,9 @@ float gib_relief_sample(
 	in texture_sampler_2d height_sampler,
 	in float2 texcoord)
 {
-	if (height_sample_halo3)
+	if (height_sample_decal)
+		return 1.0 - sample2D(alpha_map, texcoord).w;
+	else if (height_sample_halo3)
 		return min(sample2D(height_sampler, texcoord).g, 0.5) * 2;
 	else
 		return sample2D(height_sampler, texcoord).g;
@@ -119,15 +122,16 @@ void calc_parallax_relief_ps(
 	float size= 1.0 / height_linear_steps;
 	float depth= 1.0;
 	float best_depth= 1.0;
+	int steps;
 	
-	for (int steps = 0; steps < height_linear_steps - 1; steps++)
+	for (steps = 0; steps < height_linear_steps - 1; steps++)
 	{
 		depth -= size;
 		if (depth >= 1.0 - sample_relief(texcoord + ds * depth))
 			best_depth = depth;
 	}
 	depth = best_depth - size;
-	for (int steps = 0; steps < height_binary_steps; steps++)
+	for (steps = 0; steps < height_binary_steps; steps++)
 	{
 		size *= 0.5;
 		if (depth >= 1.0 - sample_relief(texcoord + ds * depth))

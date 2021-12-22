@@ -38,6 +38,9 @@ CATEGORY_PARAM(category_bump_mapping);
 #ifndef category_tinting
 CATEGORY_PARAM(category_tinting);
 #endif
+#ifndef category_parallax
+CATEGORY_PARAM(category_parallax);
+#endif
 
 // We set the sampler address mode to black border in the render_method_option.  That guarantees no effect
 // for most blend modes, but not all.  For the other modes, we do a pixel kill.
@@ -81,6 +84,7 @@ struct s_decal_interpolators
 	float3 m_tangent	:TEXCOORD2;	
 	float3 m_binormal	:TEXCOORD3;	
 	float3 m_normal		:TEXCOORD4;
+	float3 fragment_to_camera_world	: TEXCOORD5;
 #endif
 };
 
@@ -108,6 +112,8 @@ s_decal_interpolators default_vs( vertex_type IN )
 	OUT.m_normal= IN.normal;	// currently, decals are always in world space
 	OUT.m_tangent= IN.tangent;
 	OUT.m_binormal= IN.binormal;
+	// world space direction to eye/camera
+	OUT.fragment_to_camera_world = Camera_Position - IN.position;
 #endif
 
 #if DX_VERSION == 11
@@ -150,6 +156,7 @@ PARAM_SAMPLER_2D(palette);
 #include "albedo_pass.fx"
 #include "render_target.fx"
 #include "bump_mapping.fx"
+#include "parallax.fx"
 
 #define RENDER_TARGET_ALBEDO_ONLY			0
 #define RENDER_TARGET_ALBEDO_AND_NORMAL		1
@@ -458,18 +465,33 @@ s_decal_render_pixel_out convert_to_decal_target(float4 color, float3 normal, fl
 #endif
 s_decal_render_pixel_out default_ps(s_decal_interpolators IN)
 {
+	float2 texcoord = IN.m_texcoord.xy;
+	float2 clip_texcoord = IN.m_texcoord.zw;
+	
+//#if TEST_CATEGORY_OPTION(parallax, relief)
+//	// convert view direction to tangent space
+//	float3 view_dir= normalize(IN.fragment_to_camera_world);
+//	float3 view_dir_in_tangent_space= mul(tangent_frame(IN), view_dir);
+//	
+//	// compute parallax
+//	calc_parallax_relief_ps(texcoord, tangent_frame(IN), view_dir, view_dir_in_tangent_space, texcoord);
+//	calc_parallax_relief_ps(clip_texcoord, tangent_frame(IN), view_dir, view_dir_in_tangent_space, clip_texcoord);
+//	
+//	return convert_to_decal_target(sample2D(base_map, texcoord), 0.f, 0.f);
+//#endif
+	
 	if (true /*pixel_kill_enabled*/)	// debug render has a performace impact, so moving this to vertex shader
 	{
 		// This block translates to 2 ALU instructions with no branches.
 		// In some cases we can use the built in border address mode instead (see BLACK_BORDER_INSUFFICIENT)
-		clip(float4(IN.m_texcoord.xy, 1.0f-IN.m_texcoord.xy));
+		clip(float4(texcoord, 1.0f-texcoord));
 	}
 
-	float4 diffuse= sample_diffuse(IN.m_texcoord.xy, IN.m_texcoord.zw, 0.0f);
+	float4 diffuse= sample_diffuse(texcoord, clip_texcoord, 0.0f);
 	tint_and_modulate(diffuse);
 	fade_out(diffuse);
 
-	float3 bump= sample_bump(IN.m_texcoord.xy, IN.m_texcoord.zw, tangent_frame(IN));
+	float3 bump= sample_bump(texcoord, clip_texcoord, tangent_frame(IN));
 	
 	return convert_to_decal_target(diffuse, bump, IN.m_pos_w);
 }
