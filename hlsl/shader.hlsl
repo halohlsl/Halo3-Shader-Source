@@ -1,1 +1,1 @@
-#include "simple.hlsl"
+#include "shader.fx"
