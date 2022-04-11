@@ -665,16 +665,13 @@ accum_pixel water_shading(s_water_interpolators INTERPOLATORS)
 	texcoord_ss = k_water_player_view_constant.xy + texcoord_ss * k_water_player_view_constant.zw;
 
 	//	get current pixel depth
-	float depth_width, depth_height;
-	depth_buffer.GetDimensions(depth_width, depth_height);
-	float depth_water = depth_buffer.Load(int3((texcoord_ss * float2(depth_width, depth_height)), 0)).r;
+	float depth_water = depth_buffer.Load(int3(calc_viewport_pixel_coords_from_uv(texcoord_ss), 0)).r;
 
 	if (depth_water > INTERPOLATORS.position.z)
 	{
 		// if depth test failed return current pixel color
 		float scene_ldr_texture_width, scene_ldr_texture_height;
-		scene_ldr_texture.t.GetDimensions(scene_ldr_texture_width, scene_ldr_texture_height);
-		float4 scene_ldr_texture_color = scene_ldr_texture.t.Load(int3((texcoord_ss * float2(scene_ldr_texture_width, scene_ldr_texture_height)), 0));
+		float4 scene_ldr_texture_color = scene_ldr_texture.t.Load(int3(calc_viewport_pixel_coords_from_uv(texcoord_ss), 0));
 		return convert_to_render_target(scene_ldr_texture_color, true, true);
 	}
 
@@ -787,7 +784,7 @@ accum_pixel water_shading(s_water_interpolators INTERPOLATORS)
 		lightmap_intensity= saturate(sh_coefficients_0);		
 	}
 			
-	float4 water_color_from_texture= sample2D(watercolor_texture, INTERPOLATORS.base_tex.xy);
+	float4 water_color_from_texture= sampleBiasGlobal2D(watercolor_texture, INTERPOLATORS.base_tex.xy);
 	water_color_from_texture.xyz*= watercolor_coefficient;	
 
 	float3 water_color;
@@ -829,11 +826,7 @@ accum_pixel water_shading(s_water_interpolators INTERPOLATORS)
 		float2 delta= 0.001f;	//###xwan avoid fetch back pixel, it could be considered into k_water_player_view_constant
 		texcoord_refraction= clamp(texcoord_refraction, k_water_player_view_constant.xy+delta, k_water_player_view_constant.xy+k_water_player_view_constant.zw-delta);
 
-#if DX_VERSION == 11
-		depth_refraction = depth_buffer.Load(int3((texcoord_refraction * float2(depth_width, depth_height)), 0)).r;
-#else		
-		depth_refraction= sample2D(depth_buffer, texcoord_refraction).r;	
-#endif
+		depth_refraction = depth_buffer.Load(int3(calc_viewport_pixel_coords_from_uv(texcoord_refraction), 0)).r;
 #if (DX_VERSION == 9) && defined(pc)
 		depth_refraction = k_water_view_depth_constant.x / depth_refraction + k_water_view_depth_constant.y; // Zbuf = -FN/(F-N) / z + F/(F-N)
 #endif // pc
@@ -853,11 +846,8 @@ accum_pixel water_shading(s_water_interpolators INTERPOLATORS)
 		color_refraction_bed= color_refraction;	//	pure color of under water stuff
 
 		//	check real refraction
-#if DX_VERSION == 11
-		depth_refraction = depth_buffer.Load(int3((texcoord_refraction * float2(depth_width, depth_height)), 0)).r;
-#else
-		depth_refraction= sample2D(depth_buffer, texcoord_refraction).r;	
-#endif
+		depth_refraction = depth_buffer.Load(int3(calc_viewport_pixel_coords_from_uv(texcoord_refraction), 0)).r;
+
 #if (DX_VERSION == 9) && defined(pc)
 		depth_refraction = k_water_view_depth_constant.x / depth_refraction + k_water_view_depth_constant.y; // Zbuf = -FN/(F-N) / z + F/(F-N)
 #endif // pc
@@ -922,8 +912,8 @@ accum_pixel water_shading(s_water_interpolators INTERPOLATORS)
 		if ( foam_factor > 0.002f )
 		{
 			// blend textures
-			float4 foam= sample2D(foam_texture, transform_texcoord(INTERPOLATORS.texcoord.xy, foam_texture_xform));
-			float4 foam_detail= sample2D(foam_texture_detail, transform_texcoord(INTERPOLATORS.texcoord.xy, foam_texture_detail_xform));
+			float4 foam= sampleBiasGlobal2D(foam_texture, transform_texcoord(INTERPOLATORS.texcoord.xy, foam_texture_xform));
+			float4 foam_detail= sampleBiasGlobal2D(foam_texture_detail, transform_texcoord(INTERPOLATORS.texcoord.xy, foam_texture_detail_xform));
 			foam_color.rgb= foam.rgb * foam_detail.rgb;
 			foam_color.a= foam.a * foam_detail.a;		
 			foam_factor= foam_color.w * foam_factor;
@@ -949,7 +939,7 @@ accum_pixel water_shading(s_water_interpolators INTERPOLATORS)
 
 		// flip z
 		reflect_dir.z= abs(reflect_dir.z);
-		float4 environment_sample= sampleCUBE(environment_map, reflect_dir);
+		float4 environment_sample= sampleBiasGlobalCUBE(environment_map, reflect_dir);
 
 		// apply HDR from alpha, but dim it in shadow area
 		float2 parts;

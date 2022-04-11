@@ -10,7 +10,7 @@
 #include "lens_flare_registers.fx"
 //@generate screen
 
-LOCAL_SAMPLER_2D(source_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(source_sampler, 0);
 
 #define CENTER		center_rotation.xy
 #define ROTATION	center_rotation.z
@@ -65,6 +65,6 @@ float4 default_ps(
 	float4 color_to_nth = pow(legacy_h3_flares ? color : color.gggg, modulation_factor.y); // gamma-enhanced monochrome channel to generate 'hot' white centers in new flares
 	float4 outColor = (color_to_nth * modulation_factor.x) + (color * tint_color); // color tinted external areas for cool exterior
 
- 	float brightness = tint_color.a * ILLUM_EXPOSURE * scale.r * modulation_factor.z;
+ 	float brightness = tint_color.a * ILLUM_EXPOSURE * ps_postprocess_scale.r * modulation_factor.z;
  	return outColor * brightness;
 }

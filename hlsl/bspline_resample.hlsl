@@ -10,7 +10,7 @@
 #include "bspline_resample_registers.fx"
 //@generate screen
 
-LOCAL_SAMPLER_2D(surface_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(surface_sampler, 0);
 
 // pixel fragment entry points
 float4 default_ps(screen_output IN) : SV_Target

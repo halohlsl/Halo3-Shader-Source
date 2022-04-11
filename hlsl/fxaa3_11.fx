@@ -624,7 +624,7 @@ NOTE the other tuning knobs are now in the shader function inputs!
     #define FxaaHalf4 vec4
     #define FxaaInt2 ivec2
     #define FxaaSat(x) clamp(x, 0.0, 1.0)
-    #define FxaaTex texture_sampler_2d
+    #define FxaaTex viewport_texture_sampler_2d
 #else
     #define FxaaBool bool
     #define FxaaDiscard clip(-1)
@@ -638,64 +638,64 @@ NOTE the other tuning knobs are now in the shader function inputs!
     #define FxaaHalf4 half4
     #define FxaaSat(x) saturate(x)
 #endif
-/*--------------------------------------------------------------------------*/
-#if (FXAA_GLSL_120 == 1)
-    // Requires,
-    //  #version 120
-    // And at least,
-    //  #extension GL_EXT_gpu_shader4 : enable
-    //  (or set FXAA_FAST_PIXEL_OFFSET 1 to work like DX9)
-    #define FxaaTexTop(t, p) texture2DLod(t, p, 0.0)
-    #if (FXAA_FAST_PIXEL_OFFSET == 1)
-        #define FxaaTexOff(t, p, o, r) texture2DLodOffset(t, p, 0.0, o)
-    #else
-        #define FxaaTexOff(t, p, o, r) texture2DLod(t, p + (o * r), 0.0)
-    #endif
-    #if (FXAA_GATHER4_ALPHA == 1)
-        // use #extension GL_ARB_gpu_shader5 : enable
-        #define FxaaTexAlpha4(t, p) textureGather(t, p, 3)
-        #define FxaaTexOffAlpha4(t, p, o) textureGatherOffset(t, p, o, 3)
-        #define FxaaTexGreen4(t, p) textureGather(t, p, 1)
-        #define FxaaTexOffGreen4(t, p, o) textureGatherOffset(t, p, o, 1)
-    #endif
-#endif
-/*--------------------------------------------------------------------------*/
-#if (FXAA_GLSL_130 == 1)
-    // Requires "#version 130" or better
-    #define FxaaTexTop(t, p) textureLod(t, p, 0.0)
-    #define FxaaTexOff(t, p, o, r) textureLodOffset(t, p, 0.0, o)
-    #if (FXAA_GATHER4_ALPHA == 1)
-        // use #extension GL_ARB_gpu_shader5 : enable
-        #define FxaaTexAlpha4(t, p) textureGather(t, p, 3)
-        #define FxaaTexOffAlpha4(t, p, o) textureGatherOffset(t, p, o, 3)
-        #define FxaaTexGreen4(t, p) textureGather(t, p, 1)
-        #define FxaaTexOffGreen4(t, p, o) textureGatherOffset(t, p, o, 1)
-    #endif
-#endif
-/*--------------------------------------------------------------------------*/
-#if (FXAA_HLSL_3 == 1) || (FXAA_360 == 1) || (FXAA_PS3 == 1)
-    #define FxaaInt2 float2
-    #define FxaaTex texture_sampler_2d
-    #define FxaaTexTop(t, p) sample2Dlod(t, p, 0.0)
-    #define FxaaTexOff(t, p, o, r) sample2Dlod(t, p + (o * r), 0)
-#endif
-/*--------------------------------------------------------------------------*/
-#if (FXAA_HLSL_4 == 1)
-    #define FxaaInt2 int2
-    struct FxaaTex { SamplerState smpl; Texture2D tex; };
-    #define FxaaTexTop(t, p) t.tex.SampleLevel(t.smpl, p, 0.0)
-    #define FxaaTexOff(t, p, o, r) t.tex.SampleLevel(t.smpl, p, 0.0, o)
-#endif
-/*--------------------------------------------------------------------------*/
+///*--------------------------------------------------------------------------*/
+//#if (FXAA_GLSL_120 == 1)
+//    // Requires,
+//    //  #version 120
+//    // And at least,
+//    //  #extension GL_EXT_gpu_shader4 : enable
+//    //  (or set FXAA_FAST_PIXEL_OFFSET 1 to work like DX9)
+//    #define FxaaTexTop(t, p) texture2DLod(t, p, 0.0)
+//    #if (FXAA_FAST_PIXEL_OFFSET == 1)
+//        #define FxaaTexOff(t, p, o, r) texture2DLodOffset(t, p, 0.0, o)
+//    #else
+//        #define FxaaTexOff(t, p, o, r) texture2DLod(t, p + (o * r), 0.0)
+//    #endif
+//    #if (FXAA_GATHER4_ALPHA == 1)
+//        // use #extension GL_ARB_gpu_shader5 : enable
+//        #define FxaaTexAlpha4(t, p) textureGather(t, p, 3)
+//        #define FxaaTexOffAlpha4(t, p, o) textureGatherOffset(t, p, o, 3)
+//        #define FxaaTexGreen4(t, p) textureGather(t, p, 1)
+//        #define FxaaTexOffGreen4(t, p, o) textureGatherOffset(t, p, o, 1)
+//    #endif
+//#endif
+///*--------------------------------------------------------------------------*/
+//#if (FXAA_GLSL_130 == 1)
+//    // Requires "#version 130" or better
+//    #define FxaaTexTop(t, p) textureLod(t, p, 0.0)
+//    #define FxaaTexOff(t, p, o, r) textureLodOffset(t, p, 0.0, o)
+//    #if (FXAA_GATHER4_ALPHA == 1)
+//        // use #extension GL_ARB_gpu_shader5 : enable
+//        #define FxaaTexAlpha4(t, p) textureGather(t, p, 3)
+//        #define FxaaTexOffAlpha4(t, p, o) textureGatherOffset(t, p, o, 3)
+//        #define FxaaTexGreen4(t, p) textureGather(t, p, 1)
+//        #define FxaaTexOffGreen4(t, p, o) textureGatherOffset(t, p, o, 1)
+//    #endif
+//#endif
+///*--------------------------------------------------------------------------*/
+//#if (FXAA_HLSL_3 == 1) || (FXAA_360 == 1) || (FXAA_PS3 == 1)
+//    #define FxaaInt2 float2
+//    #define FxaaTex viewport_texture_sampler_2d
+//    #define FxaaTexTop(t, p) sample2Dlod(t, p, 0.0)
+//    #define FxaaTexOff(t, p, o, r) sample2Dlod(t, p + (o * r), 0)
+//#endif
+///*--------------------------------------------------------------------------*/
+//#if (FXAA_HLSL_4 == 1)
+//    #define FxaaInt2 int2
+//    struct FxaaTex { SamplerState smpl; Texture2D tex; };
+//    #define FxaaTexTop(t, p) t.tex.SampleLevel(t.smpl, p, 0.0)
+//    #define FxaaTexOff(t, p, o, r) t.tex.SampleLevel(t.smpl, p, 0.0, o)
+//#endif
+///*--------------------------------------------------------------------------*/
 #if (FXAA_HLSL_5 == 1)
     #define FxaaInt2 int2
-	#define FxaaTex texture_sampler_2d
-    #define FxaaTexTop(_t, _p) _t.t.SampleLevel(_t.s, _p, 0.0)
-    #define FxaaTexOff(_t, _p, _o, _r) _t.t.SampleLevel(_t.s, _p, 0.0, _o)
-    #define FxaaTexAlpha4(_t, _p) _t.t.GatherAlpha(_t.s, _p)
-    #define FxaaTexOffAlpha4(_t, _p, _o) _t.t.GatherAlpha(_t.s, _p, _o)
-    #define FxaaTexGreen4(_t, _p) _t.t.GatherGreen(_t.s, _p)
-    #define FxaaTexOffGreen4(_t, _p, _o) _t.t.GatherGreen(_t.s, _p, _o)
+	#define FxaaTex viewport_texture_sampler_2d
+    #define FxaaTexTop(_t, _p) sample2Dlod(_t, _p, 0.0)
+    #define FxaaTexOff(_t, _p, _o, _r) sample2DlodOffset(_t, _p, 0.0, _o)
+    #define FxaaTexAlpha4(_t, _p) gatherAlpha(_t, _p)
+    #define FxaaTexOffAlpha4(_t, _p, _o) gatherAlphaOffset(_t, _p, _o)
+    #define FxaaTexGreen4(_t, _p) gatherGreen(_t, _p)
+    #define FxaaTexOffGreen4(_t, _p, _o) gatherGreenOffset(_t, _p, _o)
 #endif
 
 

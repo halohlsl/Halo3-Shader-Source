@@ -6,20 +6,9 @@
 #include "postprocess.fx"
 //@generate screen
 
-LOCAL_SAMPLER_2D(source_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(source_sampler, 0);
 
 float4 default_ps(screen_output IN, SCREEN_POSITION_INPUT(vpos)) : SV_Target
 {
-#ifdef pc
- 	return sample2D(source_sampler, IN.texcoord * scale.xy);
- #else
-	// wrap at 8x8
-	vpos= vpos - 8.0 * floor(vpos / 8.0);
- 
-	float4 result;
-	asm {
-		tfetch2D result, vpos, source_sampler, UnnormalizedTextureCoords = true, MagFilter = point, MinFilter = point, MipFilter = point, AnisoFilter = disabled
-	};
-	return result;
- #endif
+ 	return sample2D(source_sampler, IN.texcoord * ps_postprocess_scale.xy);
 }

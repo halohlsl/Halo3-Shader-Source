@@ -200,7 +200,7 @@ float4 sample_diffuse(float2 texcoord)
 {
 	IF_CATEGORY_OPTION(albedo, diffuse_only)
 	{
-		return sample2D(base_map, texcoord);
+		return sampleBiasGlobal2D(base_map, texcoord);
 	}
 }
 

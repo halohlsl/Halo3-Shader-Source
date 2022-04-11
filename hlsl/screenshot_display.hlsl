@@ -9,7 +9,7 @@
 #include "crop_registers.fx"
 //@generate screen
 
-LOCAL_SAMPLER_2D(source_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(source_sampler, 0);
 
 // returns black outside of the rectangle (in texture coordinate space:)
 //

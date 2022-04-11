@@ -140,7 +140,7 @@ void calc_material_organism_ps(
 	const float3 surface_normal= tangent_frame[2];
 
 	// sample specular map
-	float4 specular_map_color= sample2D(specular_map, texcoord);
+	float4 specular_map_color= sampleBiasGlobal2D(specular_map, texcoord);
 	float power_or_roughness= specular_map_color.a * specular_power;	
 
 	// calculate simple dynamic lights	
@@ -206,7 +206,7 @@ void calc_material_organism_ps(
 
 	
 	// begin the hack of skin	
-	float2 occlusion_map_value= sample2D(occlusion_parameter_map, texcoord).xy;
+	float2 occlusion_map_value= sampleBiasGlobal2D(occlusion_parameter_map, texcoord).xy;
 	float ambient_occlusion= occlusion_map_value.x;
 	float visibility_occlusion= occlusion_map_value.y;	
 
@@ -244,7 +244,7 @@ void calc_material_organism_ps(
 	FORCE_BRANCH
 	if ( subsurface_coefficient > 0.01f)
 	{
-		float4 subsurface_map_color= sample2D(subsurface_map, texcoord);
+		float4 subsurface_map_color= sampleBiasGlobal2D(subsurface_map, texcoord);
 
 		float3 subsurface_normal=
 			normalize(			
@@ -287,7 +287,7 @@ void calc_material_organism_ps(
 	FORCE_BRANCH
 	if ( transparence_coefficient > 0.01f)
 	{
-		float4 transparence_map_color= sample2D(transparence_map, texcoord);
+		float4 transparence_map_color= sampleBiasGlobal2D(transparence_map, texcoord);
 
 		float3 area_radiance_transparence= 0.0f;
 		calculate_area_specular_phong_order_2(
@@ -377,7 +377,7 @@ void calc_material_analytic_specular_organism_ps(
 	out float3 analytic_specular_radiance)					// return specular radiance from this light				<--- ONLY REQUIRED OUTPUT FOR DYNAMIC LIGHTS
 {
 	// sample specular map
-	float4 specular_map_color= sample2D(specular_map, texcoord);
+	float4 specular_map_color= sampleBiasGlobal2D(specular_map, texcoord);
 	float power_or_roughness= specular_map_color.a * specular_power * dot(specular_map_color.rgb, specular_map_color.rgb);	
 
 	// calculate simple dynamic lights	
@@ -406,7 +406,7 @@ void calc_material_analytic_specular_organism_ps(
 			specular_tint * specular_map_color.rgb;
 
 	// begin the hack of skin	
-	float2 occlusion_map_value= sample2D(occlusion_parameter_map, texcoord).xy;
+	float2 occlusion_map_value= sampleBiasGlobal2D(occlusion_parameter_map, texcoord).xy;
 	float ambient_occlusion= occlusion_map_value.x;
 	float visibility_occlusion= occlusion_map_value.y;	
 
@@ -415,7 +415,7 @@ void calc_material_analytic_specular_organism_ps(
 	FORCE_BRANCH
 	if ( subsurface_coefficient > 0.01f)
 	{
-		float4 subsurface_map_color= sample2D(subsurface_map, texcoord);
+		float4 subsurface_map_color= sampleBiasGlobal2D(subsurface_map, texcoord);
 
 		float3 subsurface_normal=
 			normalize(			

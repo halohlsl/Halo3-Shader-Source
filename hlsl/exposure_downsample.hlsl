@@ -6,8 +6,8 @@
 #include "postprocess.fx"
 //@generate screen
 
-LOCAL_SAMPLER_2D(source_sampler, 0);
-LOCAL_SAMPLER_2D(weight_sampler, 1);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(source_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(weight_sampler, 1);
 
 float4 default_ps(screen_output IN) : SV_Target
 {
@@ -28,5 +28,5 @@ float4 default_ps(screen_output IN) : SV_Target
 	average.xy /= average.z;
 	average.y= log2( 0.00001f + average.y );
 	
-	return (average.y * scale.x + average.x * (1.0f - scale.x));
+	return (average.y * ps_postprocess_scale.x + average.x * (1.0f - ps_postprocess_scale.x));
 }

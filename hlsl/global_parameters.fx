@@ -73,6 +73,7 @@
 
 	#define PARAM_SAMPLER_2D(_name) DECLARE_PARAM_SAMPLER(_name, texture2D, texture_sampler_2d)
 	#define PARAM_SAMPLER_COMPARISON_2D(_name) DECLARE_PARAM_SAMPLER_COMPARISON(_name, texture2D, texture_sampler_comparison_2d)
+	#define PARAM_SAMPLER_2D_HALF(_name) DECLARE_PARAM_SAMPLER_COMPARISON(_name, texture2D, texture_sampler_2d_half)
 	#define PARAM_SAMPLER_3D(_name)	DECLARE_PARAM_SAMPLER(_name, texture3D, texture_sampler_3d)
 	#define PARAM_SAMPLER_CUBE(_name) DECLARE_PARAM_SAMPLER(_name, TextureCube, texture_sampler_cube)
 	#define PARAM_SAMPLER_2D_ARRAY(_name) DECLARE_PARAM_SAMPLER(_name, Texture2DArray, texture_sampler_2d_array)

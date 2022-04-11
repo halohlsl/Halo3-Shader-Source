@@ -11,181 +11,6 @@
 #define k_maximum_simple_light_count			16
 #endif
 
-#if DX_VERSION == 9
-
-// Shader constants which are off-limits (expected to persist throughout the frame)
-#define k_register_viewproj_xform				c0
-#define k_register_camera_forward				c4
-#define k_register_camera_left					c5
-#define k_register_camera_up					c6
-#define k_register_camera_position				c7
-#define k_register_screen_xform					c8
-#define k_register_viewport_scale				c10
-#define k_register_viewport_offset				c11
-#define k_ravi_constants_start					c240
-
-#define k_register_camera_position_ps			c16
-
-// 5 registers per simple light: [c18,c58) used on pc and [c18,c98) used on xenon
-
-#define k_register_simple_light_count			c17
-#define k_register_simple_light_start			c18
-
-#ifndef PC_CPU
-   VERTEX_CONSTANT(float4x4, View_Projection, k_register_viewproj_xform);		// WARNING:  View_Projection[0] is _NOT_ the same as k_register_viewproj_xform, HLSL treats the matrix as transposed
-#endif
-VERTEX_CONSTANT(float3, Camera_Forward, k_register_camera_forward);			// the position and orientation of the camera in world space
-VERTEX_CONSTANT(float3, Camera_Left, k_register_camera_left);
-VERTEX_CONSTANT(float3, Camera_Up, k_register_camera_up);
-VERTEX_CONSTANT(float3, Camera_Position, k_register_camera_position);
-#ifndef PC_CPU
-   VERTEX_CONSTANT(float2x4, Screen, k_register_screen_xform);
-#endif
-VERTEX_CONSTANT(float3, Viewport_Scale, k_register_viewport_scale);
-VERTEX_CONSTANT(float3, Viewport_Offset, k_register_viewport_offset);
-
-
-VERTEX_CONSTANT(float4, v_exposure, c232 );
-VERTEX_CONSTANT(float4, v_alt_exposure, c239 );
-
-VERTEX_CONSTANT(float4, v_atmosphere_constant_extra, c15);					
-VERTEX_CONSTANT(float4, v_atmosphere_constant_0, c233);					
-VERTEX_CONSTANT(float4, v_atmosphere_constant_1, c234);					
-VERTEX_CONSTANT(float4, v_atmosphere_constant_2, c235);					
-VERTEX_CONSTANT(float4, v_atmosphere_constant_3, c236);					
-VERTEX_CONSTANT(float4, v_atmosphere_constant_4, c237);					
-VERTEX_CONSTANT(float4, v_atmosphere_constant_5, c238);					
-
-VERTEX_CONSTANT(float4, v_lighting_constant_0, c240);
-#ifndef PC_CPU
-   VERTEX_CONSTANT(float4x4, Shadow_Projection, c240);					// used for dynamic light, to hold the light projection matrix
-#endif
-VERTEX_CONSTANT(float4, v_lighting_constant_1, c241);
-VERTEX_CONSTANT(float4, v_lighting_constant_2, c242);
-VERTEX_CONSTANT(float4, v_lighting_constant_3, c243);
-VERTEX_CONSTANT(float4, v_lighting_constant_4, c244);
-VERTEX_CONSTANT(float4, v_lighting_constant_5, c245);
-VERTEX_CONSTANT(float4, v_lighting_constant_6, c246);
-VERTEX_CONSTANT(float4, v_lighting_constant_7, c247);
-VERTEX_CONSTANT(float4, v_lighting_constant_8, c248);
-VERTEX_CONSTANT(float4, v_lighting_constant_9, c249);
-
-#ifdef pc
-VERTEX_CONSTANT(bool, v_mesh_squished, b8);
-VERTEX_CONSTANT(float4, v_squish_params, c250);
-#endif
-
-
-#ifndef PC_CPU
-   PIXEL_CONSTANT(float4, g_exposure, c0 );							// exposure multiplier, HDR target multiplier, HDR alpha multiplier, LDR alpha multiplier		// ###ctchou $REVIEW could move HDR target multiplier to exponent bias and just set HDR alpha multiplier..
-   PIXEL_CONSTANT(float4, p_lighting_constant_0, c1);					// NOTE: these are also used for shadow_apply entry point (to hold the shadow projection matrix), as well as dynamic lights (to hold additional shadow info)
-   PIXEL_CONSTANT(float4, Shadow_Projection_z, c1);					//
-   PIXEL_CONSTANT(float4, p_lighting_constant_1, c2);
-   PIXEL_CONSTANT(float4, p_lighting_constant_2, c3);
-   PIXEL_CONSTANT(float4, p_lighting_constant_3, c4);
-   PIXEL_CONSTANT(float4, p_lighting_constant_4, c5);
-   PIXEL_CONSTANT(float4, p_dynamic_light_gel_xform, c5);				// overlaps lighting constant - they're unused in the expensive dynamic light pass
-   PIXEL_CONSTANT(float4, p_lighting_constant_5, c6);
-   PIXEL_CONSTANT(float4, p_lighting_constant_6, c7);
-   PIXEL_CONSTANT(float4, p_lighting_constant_7, c8);
-   PIXEL_CONSTANT(float4, p_lighting_constant_8, c9);
-   PIXEL_CONSTANT(float4, p_lighting_constant_9, c10);
-
-
-   PIXEL_CONSTANT(float4, g_alt_exposure, c12);						// self-illum exposure, unused, unused, unused
-
-
-   // ###xwan moved from oneshot
-   PIXEL_CONSTANT(float2,  texture_size, c14);							// used for pixel-shader implemented bilinear, and albedo textures
-   PIXEL_CONSTANT(float4,  dynamic_environment_blend, c15);
-
-
-   PIXEL_CONSTANT(float4, p_lightmap_compress_constant_0, c210);
-   PIXEL_CONSTANT(float4, p_lightmap_compress_constant_1, c211);
-   PIXEL_CONSTANT(float4, p_lightmap_compress_constant_2, c212);
-#endif
-
-#ifndef PC_CPU
-   #ifndef pc
-   PIXEL_CONSTANT(float4, p_tiling_vpos_offset, c108);
-   PIXEL_CONSTANT(float4, p_tiling_resolvetexture_xform, c109);
-   PIXEL_CONSTANT(float4, p_tiling_reserved2,   c110);
-   PIXEL_CONSTANT(float4, p_tiling_reserved3,   c111);
-   #endif
-#endif
-
-#ifndef PC_CPU
-PIXEL_CONSTANT(float4, p_render_debug_mode, c94);	
-#endif
-
-#ifdef pc
-PIXEL_CONSTANT(float, p_shader_pc_specular_enabled, c95);				// first register after simple lights
-PIXEL_CONSTANT(float, p_shader_pc_albedo_lighting, c96);
-#endif // pc
-
-#ifndef PC_CPU
-   #ifdef pc
-      PIXEL_CONSTANT(float, simple_light_count, k_register_simple_light_count);
-      PIXEL_CONSTANT(float4, simple_lights[k_maximum_simple_light_count][5], k_register_simple_light_start); 
-      #define dynamic_lights_use_array_notation 1
-   #else // xenon
-      PIXEL_CONSTANT(int, simple_light_count_int, i0);
-      PIXEL_CONSTANT(float, simple_light_count_float, k_register_simple_light_count);
-
-      #ifdef xdk_2907
-      // stupid unoptimized code can't handle loops apparently - requires floating point light count
-      #define simple_light_count simple_light_count_float
-      PIXEL_CONSTANT(float4, simple_lights[k_maximum_simple_light_count][5], k_register_simple_light_start); 
-      #define dynamic_lights_use_array_notation 1
-      #else
-      #define simple_light_count simple_light_count_int
-      PIXEL_CONSTANT(float4, simple_lights[k_maximum_simple_light_count * 5], k_register_simple_light_start); 
-      #endif
-
-   #endif // xenon
-
-
-   PIXEL_CONSTANT(float3, Camera_Position_PS, k_register_camera_position_ps);
-
-   bool always_true : register(b0);
-   /*#ifdef pc
-	   #define actually_calc_albedo true	// no bool constants in pixel shader
-	   //	###xwan	constants for light map dxt5 compression, reservated comstants from 60 to 79
-	   #define p_lightmap_compress_constant_using_dxt true	// lighting calcs albedo instead of sampling it 
-   #else*/
-	   bool actually_calc_albedo : register(b0);	// lighting calcs albedo instead of sampling it 
-	   //	###xwan	constants for light map dxt5 compression, reservated comstants from 60 to 79
-	   bool p_lightmap_compress_constant_using_dxt : register(b10);	// lighting calcs albedo instead of sampling it 
-   //#endif 
-
-
-   PIXEL_CONSTANT(bool, LDR_gamma2, b14);		// ###ctchou $TODO $PERF remove these when we settle on a render target format
-   PIXEL_CONSTANT(bool, HDR_gamma2, b15);
-
-
-   //vertex shader samplers
-   VERTEX_SAMPLER_CONSTANT (sampler_atmosphere_neta_table, s0);
-   VERTEX_SAMPLER_CONSTANT (sampler_weather_occlusion, s1);	// can go in oneshot if necessary
-
-
-   //pixel shader common samplers --- do not allow any collisions by explicitly declaring samplers greater than 10 elsewhere!!!
-   //STATIC LIGHTING
-   sampler albedo_texture;
-   sampler normal_texture;
-
-   sampler lightprobe_texture_array;
-   sampler dominant_light_intensity_map;
-
-
-   //WATER, ACTIVE CAMO
-   sampler scene_ldr_texture;
-
-   //WATER, PARTICLES 
-   sampler depth_buffer;
-#endif
-
-#elif DX_VERSION == 11
-
 #ifndef DEFINE_CPP_CONSTANTS
 #define always_true true
 #endif
@@ -312,13 +137,12 @@ VERTEX_TEXTURE_AND_SAMPLER(_2D,			sampler_weather_occlusion,		k_vs_sampler_weath
 PIXEL_TEXTURE_AND_SAMPLER(_2D_ARRAY,	lightprobe_texture_array,		k_sampler_lightprobe_texture_array,		13)
 PIXEL_TEXTURE_AND_SAMPLER(_2D_ARRAY,	dominant_light_intensity_map,	k_sampler_dominant_light_intensity_map,	14)
 
-PIXEL_TEXTURE_AND_SAMPLER(_2D,			scene_ldr_texture,				k_sampler_scene_ldr_texture,			15)
+PIXEL_TEXTURE_AND_SAMPLER_IN_VIEWPORT_ALWAYS(_2D_VIEWPORT,	scene_ldr_texture,				k_sampler_scene_ldr_texture,			15)
 
 PIXEL_TEXTURE(_2D,		albedo_texture,					k_sampler_albedo_texture,				16)
 PIXEL_TEXTURE(_2D,		normal_texture,					k_sampler_normal_texture,				17)
 PIXEL_TEXTURE(_2D,		depth_buffer,					k_sampler_depth_buffer,					18)
 
-#endif
 
 #define V_ILLUM_SCALE (v_alt_exposure.r)
 #define V_ILLUM_EXPOSURE (v_alt_exposure.g)

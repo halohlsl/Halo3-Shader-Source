@@ -6,20 +6,20 @@
 #include "postprocess.fx"
 //@generate screen
 
-LOCAL_SAMPLER_2D(target_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(target_sampler, 0);
 //float4 kernel[11] : register(c2);		// c2 through c12 are the kernel (r,g,b)
 
 fast4 default_ps(screen_output IN) : SV_Target
 {
 	float2 sample= IN.texcoord;
 /*
-	sample.y -= 5.0 * pixel_size.y;		// -5 through +5
+	sample.y -= 5.0 * ps_postprocess_pixel_size.y;		// -5 through +5
 
 	fast3 color= 0.0;
 	for (int y= 0; y < 11; y++)
 	{
 		color += kernel[y].rgb * convert_from_bloom_buffer(sample2D(target_sampler, sample));
-		sample.y += pixel_size.y;
+		sample.y += ps_postprocess_pixel_size.y;
 	}
 */
 	// solution using bilinear filtering:
@@ -76,11 +76,11 @@ fast4 default_ps(screen_output IN) : SV_Target
 			{0.5,	+4.0 - 9.0/(1.0+9.0)			}			// +3.1
 		};
 	
-	float4 color=	(1.0   + 9.0)	* sample2D(target_sampler, sample + offset[0] * pixel_size) +
-					(36.0  + 84.0)	* sample2D(target_sampler, sample + offset[1] * pixel_size) +
-					(126.0 + 126.0)	* sample2D(target_sampler, sample + offset[2] * pixel_size) +
-					(84.0  + 36.0)	* sample2D(target_sampler, sample + offset[3] * pixel_size) +
-					(1.0   + 9.0)	* sample2D(target_sampler, sample + offset[4] * pixel_size);
+	float4 color=	(1.0   + 9.0)	* sample2D(target_sampler, sample + offset[0] * ps_postprocess_pixel_size) +
+					(36.0  + 84.0)	* sample2D(target_sampler, sample + offset[1] * ps_postprocess_pixel_size) +
+					(126.0 + 126.0)	* sample2D(target_sampler, sample + offset[2] * ps_postprocess_pixel_size) +
+					(84.0  + 36.0)	* sample2D(target_sampler, sample + offset[3] * ps_postprocess_pixel_size) +
+					(1.0   + 9.0)	* sample2D(target_sampler, sample + offset[4] * ps_postprocess_pixel_size);
 
 	return color / 512.0;
 }

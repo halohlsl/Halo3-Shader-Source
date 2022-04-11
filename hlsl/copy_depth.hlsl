@@ -6,9 +6,9 @@
 #include "postprocess.fx"
 //@generate screen
 
-LOCAL_SAMPLER_2D(source_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(source_sampler, 0);
 
 float default_ps(screen_output IN) : SV_Depth
 {
- 	return sample2D(source_sampler, IN.texcoord * scale.xy).x;
+ 	return sample2D(source_sampler, IN.texcoord * ps_postprocess_scale.xy).x;
 }

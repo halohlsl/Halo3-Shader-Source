@@ -2,10 +2,10 @@
 #define __DOF_FILTER_FX
 
 
-float4 simple_DOF_filter(float2 vTexCoord, texture_sampler_2d original_sampler, bool original_gamma2, texture_sampler_2d blurry_sampler, texture_sampler_2d zbuffer_sampler)
+float4 simple_DOF_filter(float2 vTexCoord, viewport_texture_sampler_2d original_sampler, bool original_gamma2, viewport_texture_sampler_2d blurry_sampler, viewport_texture_sampler_2d zbuffer_sampler)
 {
 	// Fetch high and low resolution taps
-	float4 vTapLow=		sample2D( blurry_sampler,	vTexCoord - (pixel_size.zw - pixel_size.xy) * 0.0f);
+	float4 vTapLow=		sample2D( blurry_sampler,	vTexCoord - (ps_postprocess_pixel_size.zw - ps_postprocess_pixel_size.xy) * 0.0f);
 	float4 vTapHigh=	sample2D( original_sampler, vTexCoord );
 	if (original_gamma2)
 	{
@@ -67,11 +67,11 @@ float4 poisson8_DOF_filter(float2 vTexCoord)
     for( int t=0; t<NUM_POISSON_TAPS; t++ )
     {
         // Fetch lo-res tap
-        float2 vCoordLow = vTexCoord + (pixel_size.xy * g_Poisson[t] * fDiscRadiusLow );
+        float2 vCoordLow = vTexCoord + (ps_postprocess_pixel_size.xy * g_Poisson[t] * fDiscRadiusLow );
         float4 vTapLow   = tex2D_offset( blur_sampler, vCoordLow, 0.5f, 0.5f );
         
         // Fetch hi-res tap
-        float2 vCoordHigh = vTexCoord + (pixel_size.zw * g_Poisson[t] * fDiscRadius );
+        float2 vCoordHigh = vTexCoord + (ps_postprocess_pixel_size.zw * g_Poisson[t] * fDiscRadius );
         float4 vTapHigh   = tex2D( surface_sampler, vCoordHigh );
         float vTapDepth	 = tex2D( depth_sampler, vCoordHigh ).r;
         vTapDepth= 1.0f / (depth_constants.x + vTapDepth * depth_constants.y);		// convert to real depth

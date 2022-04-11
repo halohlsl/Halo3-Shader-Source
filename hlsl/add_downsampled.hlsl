@@ -6,12 +6,12 @@
 #include "postprocess.fx"
 //@generate screen
 
-LOCAL_SAMPLER_2D(downsampled_sampler, 0);		// pixel_size is the size of the pixels in this texture
-LOCAL_SAMPLER_2D(original_sampler, 1);			// but not necessarily this one
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(downsampled_sampler, 0);		// ps_postprocess_pixel_size is the size of the pixels in this texture
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(original_sampler, 1);			// but not necessarily this one
 
 float3 get_pixel_bilinear(float2 tex_coord)
 {
-	tex_coord= (tex_coord / pixel_size) - 0.5;
+	tex_coord= (tex_coord / ps_postprocess_pixel_size) - 0.5;
 	float2 texel0= floor(tex_coord);
 
 	float4 blend;
@@ -20,13 +20,13 @@ float3 get_pixel_bilinear(float2 tex_coord)
 	
 	blend.xyzw= blend.zxzx * blend.wwyy;
 
-	texel0= (texel0 + 0.5)* pixel_size;
+	texel0= (texel0 + 0.5)* ps_postprocess_pixel_size;
 
 	float2 texel1= texel0;
-	texel1.x += pixel_size.x;
+	texel1.x += ps_postprocess_pixel_size.x;
 
 	float2 texel2= texel0;
-	texel2.y += pixel_size.y;
+	texel2.y += ps_postprocess_pixel_size.y;
 
 	float2 texel3= texel2;
 	texel3.x = texel1.x;
@@ -44,7 +44,7 @@ float4 default_ps(screen_output IN) : SV_Target
 	float2 sample= IN.texcoord;
 
 	float3 color= convert_from_bloom_buffer(sample2D(original_sampler, sample));
-	color += scale * get_pixel_bilinear(sample);
+	color += ps_postprocess_scale * get_pixel_bilinear(sample);
 
 	return convert_to_bloom_buffer(color);
 }

@@ -8,12 +8,12 @@
 #include "final_composite_registers.fx"
 
 
-LOCAL_SAMPLER_2D(surface_sampler, 0);		
-LOCAL_SAMPLER_2D(dark_surface_sampler, 1);		
-LOCAL_SAMPLER_2D(bloom_sampler, 2);		
-LOCAL_SAMPLER_2D(depth_sampler, 3);		// depth of field
-LOCAL_SAMPLER_2D(blur_sampler, 4);		// depth of field
-LOCAL_SAMPLER_2D(blur_grade_sampler, 5);		// weapon zoom
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(surface_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(dark_surface_sampler, 1);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(bloom_sampler, 2);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(depth_sampler, 3);		// depth of field
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(blur_sampler, 4);		// depth of field
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(blur_grade_sampler, 5);		// weapon zoom
 
 LOCAL_SAMPLER_3D(color_grading0, 6);
 LOCAL_SAMPLER_3D(color_grading1, 7);
@@ -99,7 +99,7 @@ float4 default_ps(SCREEN_POSITION_INPUT(screen_position), in float2 texcoord :TE
 	float3 blend= CALC_BLEND(texcoord, combined, bloom);						// blend them together
 
 	// apply hue and saturation (3 instructions)
-	blend= mul(float4(blend, 1.0f), p_postprocess_hue_saturation_matrix);
+	blend= mul(float4(blend, 1.0f), ps_postprocess_hue_saturation_matrix);
 
 	// apply contrast (4 instructions)
 	float luminance= dot(blend, float3(0.333f, 0.333f, 0.333f));
@@ -107,7 +107,7 @@ float4 default_ps(SCREEN_POSITION_INPUT(screen_position), in float2 texcoord :TE
 	if (luminance > 0)
 #endif
 	{
-		blend *= pow(luminance, p_postprocess_contrast.x) / luminance;
+		blend *= pow(luminance, ps_postprocess_contrast.x) / luminance;
 	}
 
 	// apply tone curve (4 instructions)

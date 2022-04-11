@@ -326,22 +326,22 @@ float4 sample_diffuse(float2 texcoord, float palette_v)
 {
 	IF_CATEGORY_OPTION(albedo, diffuse_only)
 	{
-		return sample2D(base_map, texcoord);
+		return sampleBiasGlobal2D(base_map, texcoord);
 	}
 	
 	// Dependent texture fetch.  The palette can be any size.  In order to avoid filtering artifacts,
 	// the palette should be smoothly varying, or else filtering should be turned off.
 	IF_CATEGORY_OPTION(albedo, palettized)
 	{
-		float index= sample2D(base_map, texcoord).x;
+		float index= sampleBiasGlobal2D(base_map, texcoord).x;
 		return sample2D(palette, float2(index, palette_v));
 	}
 	
 	// Same as above except the alpha comes from the original texture, not the palette.
 	IF_CATEGORY_OPTION(albedo, palettized_plus_alpha)
 	{
-		float index= sample2D(base_map, texcoord).x;
-		float alpha= sample2D(alpha_map, texcoord).w;
+		float index= sampleBiasGlobal2D(base_map, texcoord).x;
+		float alpha= sampleBiasGlobal2D(alpha_map, texcoord).w;
 		return float4(sample2D(palette, float2(index, palette_v)).xyz, alpha);
 	}
 }

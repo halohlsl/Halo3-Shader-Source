@@ -9,8 +9,8 @@
 #include "screenshot_memexport_registers.fx"
 //@generate screen
 
-LOCAL_SAMPLER_2D(source_sampler, 0);
-LOCAL_SAMPLER_2D(background_sampler, 1);			// destination texture
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(source_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(background_sampler, 1);			// destination texture
 
 // pixel fragment entry points
 float4 default_ps(screen_output IN, SCREEN_POSITION_INPUT(pos)) : SV_Target

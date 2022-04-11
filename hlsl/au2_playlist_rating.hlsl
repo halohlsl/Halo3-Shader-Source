@@ -9,7 +9,7 @@
 #include "au2_playlist_rating_registers.fx"
 //@generate screen
 
-LOCAL_SAMPLER_2D(source_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(source_sampler, 0);
 
 float4 default_ps(screen_output IN) : SV_Target
 {
@@ -34,5 +34,5 @@ float4 default_ps(screen_output IN) : SV_Target
 	// apply input color (nescessary to get UI animations)
  	color_0*= IN.color;
  	
- 	return color_0*scale;
+ 	return color_0*ps_postprocess_scale;
 }

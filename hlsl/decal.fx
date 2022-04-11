@@ -183,42 +183,42 @@ float4 sample_diffuse(float2 texcoord_tile, float2 texcoord, float palette_v)
 {
 	IF_CATEGORY_OPTION(albedo, diffuse_only)
 	{
-		return sample2D(base_map, texcoord);
+		return sampleBiasGlobal2D(base_map, texcoord);
 	}
 	
 	// Same as above except the alpha comes from a separate texture.
 	IF_CATEGORY_OPTION(albedo, diffuse_plus_alpha)
 	{
-		return float4(sample2D(base_map, texcoord).xyz, sample2D(alpha_map, texcoord).w);
+		return float4(sampleBiasGlobal2D(base_map, texcoord).xyz, sampleBiasGlobal2D(alpha_map, texcoord).w);
 	}
 	
 	// Same as above except the alpha is always a single tile even if the decal is a sprite, or tiled.
 	IF_CATEGORY_OPTION(albedo, diffuse_plus_alpha_mask)
 	{
-		return float4(sample2D(base_map, texcoord).xyz, sample2D(alpha_map, texcoord_tile).w);
+		return float4(sampleBiasGlobal2D(base_map, texcoord).xyz, sampleBiasGlobal2D(alpha_map, texcoord_tile).w);
 	}
 	
 	// Dependent texture fetch.  The palette can be any size.  In order to avoid filtering artifacts,
 	// the palette should be smoothly varying, or else filtering should be turned off.
 	IF_CATEGORY_OPTION(albedo, palettized)
 	{
-		float index= sample2D(base_map, texcoord).x;
+		float index= sampleBiasGlobal2D(base_map, texcoord).x;
 		return sample2D(palette, float2(index, palette_v));
 	}
 	
 	// Same as above except the alpha comes from the original texture, not the palette.
 	IF_CATEGORY_OPTION(albedo, palettized_plus_alpha)
 	{
-		float index= sample2D(base_map, texcoord).x;
-		float alpha= sample2D(alpha_map, texcoord).w;
+		float index= sampleBiasGlobal2D(base_map, texcoord).x;
+		float alpha= sampleBiasGlobal2D(alpha_map, texcoord).w;
 		return float4(sample2D(palette, float2(index, palette_v)).xyz, alpha);
 	}
 	
 	// Same as above except the alpha is always a single tile even if the decal is a sprite, or tiled.
 	IF_CATEGORY_OPTION(albedo, palettized_plus_alpha_mask)
 	{
-		float index= sample2D(base_map, texcoord).x;
-		float alpha= sample2D(alpha_map, texcoord_tile).w;
+		float index= sampleBiasGlobal2D(base_map, texcoord).x;
+		float alpha= sampleBiasGlobal2D(alpha_map, texcoord_tile).w;
 		return float4(sample2D(palette, float2(index, palette_v)).xyz, alpha);
 	}
 	
@@ -229,7 +229,7 @@ float4 sample_diffuse(float2 texcoord_tile, float2 texcoord, float palette_v)
 
 	IF_CATEGORY_OPTION(albedo, change_color)
 	{
-		float4 change_color= sample2D(change_color_map, texcoord);
+		float4 change_color= sampleBiasGlobal2D(change_color_map, texcoord);
 
 		change_color.xyz=	((1.0f-change_color.x) + change_color.x*primary_change_color.xyz)	*
 							((1.0f-change_color.y) + change_color.y*secondary_change_color.xyz)	*
@@ -241,8 +241,8 @@ float4 sample_diffuse(float2 texcoord_tile, float2 texcoord, float palette_v)
 #ifdef category_albedo_option_vector_alpha
 	IF_CATEGORY_OPTION(albedo, vector_alpha)
 	{
-		float3 color=				sample2D(base_map, transform_texcoord(texcoord, base_map_xform)).rgb;
-		float  vector_distance=		sample2D(vector_map, texcoord).g;
+		float3 color=				sampleBiasGlobal2D(base_map, transform_texcoord(texcoord, base_map_xform)).rgb;
+		float  vector_distance=		sampleBiasGlobal2D(vector_map, texcoord).g;
 		
 		float scale= antialias_tweak;
 #ifdef pc
@@ -265,8 +265,8 @@ float4 sample_diffuse(float2 texcoord_tile, float2 texcoord, float palette_v)
 #ifdef category_albedo_option_vector_alpha_drop_shadow
 	IF_CATEGORY_OPTION(albedo, vector_alpha_drop_shadow)
 	{
-		float vector_distance=		sample2D(vector_map, texcoord).g;
-		float shadow_distance=		sample2D(shadow_vector_map, transform_texcoord(texcoord, shadow_vector_map_xform)).g;
+		float vector_distance=		sampleBiasGlobal2D(vector_map, texcoord).g;
+		float shadow_distance=		sampleBiasGlobal2D(shadow_vector_map, transform_texcoord(texcoord, shadow_vector_map_xform)).g;
 		
 		float scale= antialias_tweak;
 #ifdef pc
@@ -287,7 +287,7 @@ float4 sample_diffuse(float2 texcoord_tile, float2 texcoord, float palette_v)
 #ifndef pc
 			[isolate]
 #endif // !pc
-			float3 color=				sample2D(base_map,	  transform_texcoord(texcoord, base_map_xform)).rgb;
+			float3 color=				sampleBiasGlobal2D(base_map,	  transform_texcoord(texcoord, base_map_xform)).rgb;
 			return float4(color * vector_alpha, vector_alpha + shadow_alpha);
 		}
 	}	

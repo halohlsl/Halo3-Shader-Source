@@ -811,39 +811,39 @@ float4 sample_diffuse(float2 texcoord_sprite, float2 texcoord_billboard, float p
 {
 	IF_CATEGORY_OPTION(albedo, diffuse_only)
 	{
-		return sample2D(base_map, texcoord_sprite);
+		return sampleBiasGlobal2D(base_map, texcoord_sprite);
 	}
 	
 	IF_CATEGORY_OPTION(albedo, diffuse_plus_billboard_alpha)
 	{
-		return float4(sample2D(base_map, texcoord_sprite).xyz, sample2D(alpha_map, texcoord_billboard).w);
+		return float4(sampleBiasGlobal2D(base_map, texcoord_sprite).xyz, sampleBiasGlobal2D(alpha_map, texcoord_billboard).w);
 	}
 	
 	IF_CATEGORY_OPTION(albedo, diffuse_plus_sprite_alpha)
 	{
-		return float4(sample2D(base_map, texcoord_sprite).xyz, sample2D(alpha_map, texcoord_sprite).w);
+		return float4(sampleBiasGlobal2D(base_map, texcoord_sprite).xyz, sampleBiasGlobal2D(alpha_map, texcoord_sprite).w);
 	}
 	
 	// Dependent texture fetch.  The palette can be any size.  In order to avoid filtering artifacts,
 	// the palette should be smoothly varying, or else filtering should be turned off.
 	IF_CATEGORY_OPTION(albedo, palettized)
 	{
-		float index= sample2D(base_map, texcoord_sprite).x;
+		float index= sampleBiasGlobal2D(base_map, texcoord_sprite).x;
 		return sample2D(palette, float2(index, palette_v));
 	}
 	
 	// Same as above except the alpha comes from the original texture, not the palette.
 	IF_CATEGORY_OPTION(albedo, palettized_plus_billboard_alpha)
 	{
-		float index= sample2D(base_map, texcoord_sprite).x;
-		float alpha= sample2D(alpha_map, texcoord_billboard).w;
+		float index= sampleBiasGlobal2D(base_map, texcoord_sprite).x;
+		float alpha= sampleBiasGlobal2D(alpha_map, texcoord_billboard).w;
 		return float4(sample2D(palette, float2(index, palette_v)).xyz, alpha);
 	}
 	
 	IF_CATEGORY_OPTION(albedo, palettized_plus_sprite_alpha)
 	{
-		float index= sample2D(base_map, texcoord_sprite).x;
-		float alpha= sample2D(alpha_map, texcoord_sprite).w;
+		float index= sampleBiasGlobal2D(base_map, texcoord_sprite).x;
+		float alpha= sampleBiasGlobal2D(alpha_map, texcoord_sprite).w;
 		return float4(sample2D(palette, float2(index, palette_v)).xyz, alpha);
 	}
 }
@@ -857,23 +857,12 @@ float compute_depth_fade(float2 screen_coords, float depth, float range)
 	}
 #endif
 
-#if DX_VERSION == 11
-	float scene_depth = 1.0f - depth_buffer.Load(int3(screen_coords.xy, 0)).x;
+	float scene_depth = 1.0f - depth_buffer.Load(int3(
+		(TEST_CATEGORY_OPTION(specialized_rendering, none) ?
+			screen_coords.xy :
+			calc_viewport_pixel_coords_from_pixel_coords(screen_coords.xy))
+		, 0)).x;
 	scene_depth= 1.0f / (depth_constants.x + scene_depth * depth_constants.y);	// convert to real depth
-#elif defined(pc)
-	// TODO solve it!
-//	depth_value = float4(1,2,3,4);
-	float2 screen_texcoord= (screen_coords.xy + float2(0.5f, 0.5f)) / texture_size.xy;
-	float scene_depth= sample2D(depth_buffer, screen_texcoord).x;
-#else
-	float4 depth_value;
-	asm 
-	{
-		tfetch2D depth_value, screen_coords, depth_buffer, UnnormalizedTextureCoords = true, MagFilter = point, MinFilter = point, MipFilter = point, AnisoFilter = disabled
-	};
-	float scene_depth= 1.0f - depth_value.x;
-	scene_depth= 1.0f / (depth_constants.x + scene_depth * depth_constants.y);	// convert to real depth
-#endif
 
 	float particle_depth= depth;
 	float delta_depth= scene_depth - particle_depth;

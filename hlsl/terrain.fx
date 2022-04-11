@@ -156,7 +156,7 @@ DECLARE_MATERIAL(3);
 
 float3 sample_bumpmap(in sampler bump_map, in float2 texcoord)
 {
-	float3 bump= sample2D(bump_map, texcoord);
+	float3 bump= sampleBiasGlobal2D(bump_map, texcoord);
    
 #if (DX_VERSION == 9) && defined(pc)
    bump.xy = bump.xy * (255.0f / 127.f) - (128.0f / 127.f);   
@@ -171,7 +171,7 @@ float3 sample_bumpmap(in sampler bump_map, in float2 texcoord)
 
 float4 sample_blend_normalized(float2 texcoord)
 {
-	float4 blend= sample2D(blend_map, transform_texcoord(texcoord, blend_map_xform));
+	float4 blend= sampleBiasGlobal2D(blend_map, transform_texcoord(texcoord, blend_map_xform));
 
 	#if MORPH_DYNAMIC(blend_type)
 		// alpha blend dynamic material
@@ -225,7 +225,7 @@ void calc_bumpmap(
 	in float4 detail_bump_xform,
 	out float3 bump)
 {
-	bump= sample2D(bump_map, transform_texcoord(texcoord, bump_map_xform));
+	bump= sampleBiasGlobal2D(bump_map, transform_texcoord(texcoord, bump_map_xform));
 #if DETAIL_BUMP_ENABLED
 	float3 detail= sample_bumpmap(detail_bump, transform_texcoord(texcoord, detail_bump_xform));
 	bump += detail;
@@ -553,8 +553,8 @@ void albedo_vs(
 COMPILER_IFANY																													\
 if (blend_amount)																												\
 {																																\
-	float4 base=	sample2D(base_map_m_##material,		transform_texcoord(original_texcoord, base_map_m_##material##_xform));		\
-	float4 detail=	sample2D(detail_map_m_##material,	transform_texcoord(original_texcoord, detail_map_m_##material##_xform));	\
+	float4 base=	sampleBiasGlobal2D(base_map_m_##material,		transform_texcoord(original_texcoord, base_map_m_##material##_xform));		\
+	float4 detail=	sampleBiasGlobal2D(detail_map_m_##material,	transform_texcoord(original_texcoord, detail_map_m_##material##_xform));	\
 	albedo_accumulate += base * detail * blendweight;																			\
 }
 
@@ -1119,7 +1119,7 @@ accum_pixel static_lighting_shared_ps(
 #if DX_VERSION == 11
 	float4 albedo = albedo_texture.Load(int3(fragment_position.xy, 0));
 #else
-	float4 albedo= sample2D(albedo_texture, (fragment_position.xy + float2(0.5f, 0.5f))/texture_size.xy);
+	float4 albedo= sampleBiasGlobal2D(albedo_texture, (fragment_position.xy + float2(0.5f, 0.5f))/texture_size.xy);
 #endif
 
 	// if any material is active, evaluate the diffuse lobe
@@ -1411,7 +1411,7 @@ accum_pixel dynamic_light_ps(
 #if DX_VERSION == 11
 	float3 bump_normal = normal_texture.Load(int3(fragment_position.xy, 0)).xyz * 2.0f - 1.0f;
 #else
-	float3 bump_normal= sample2D(normal_texture, (fragment_position.xy + float2(0.5f, 0.5f)) / texture_size.xy) * 2.0f - 1.0f;
+	float3 bump_normal= sampleBiasGlobal2D(normal_texture, (fragment_position.xy + float2(0.5f, 0.5f)) / texture_size.xy) * 2.0f - 1.0f;
 #endif
 
 	// convert view direction to tangent space
@@ -1432,7 +1432,7 @@ accum_pixel dynamic_light_ps(
 	fragment_position_shadow.xyz /= fragment_position_shadow.w;							// projective transform on xy coordinates
 	
 	// apply light gel
-	light_radiance *=  sample2D(dynamic_light_gel_texture, transform_texcoord(fragment_position_shadow.xy, p_dynamic_light_gel_xform));
+	light_radiance *=  sampleBiasGlobal2D(dynamic_light_gel_texture, transform_texcoord(fragment_position_shadow.xy, p_dynamic_light_gel_xform));
 	
 	float4 out_color= 0.0f;	
 	if (dot(light_radiance, light_radiance) > 0.0000001f)									// ###ctchou $PERF unproven 'performance' hack
@@ -1446,7 +1446,7 @@ accum_pixel dynamic_light_ps(
 #if DX_VERSION == 11
 		float4 diffuse_albedo = albedo_texture.Load(int3(fragment_position.xy, 0));
 #else
-		float4 diffuse_albedo= sample2D(albedo_texture, (fragment_position.xy + float2(0.5f, 0.5f)) / texture_size.xy);
+		float4 diffuse_albedo= sampleBiasGlobal2D(albedo_texture, (fragment_position.xy + float2(0.5f, 0.5f)) / texture_size.xy);
 #endif
 
 		// calculate view reflection direction (in world space of course)

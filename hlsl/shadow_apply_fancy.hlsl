@@ -16,29 +16,20 @@ float sample_percentage_closer_PCF_5x5_block_predicated(float3 fragment_shadow_p
 
 	float4 blend;
 
-#ifdef pc
-   float2 frac_pos = fragment_shadow_position.xy / pixel_size + float2(0.5f, 0.5f);
-   blend.xy = frac(frac_pos);
-#else
-#ifndef VERTEX_SHADER
-	fragment_shadow_position.xy += 0.5f;
-	asm {
-		getWeights2D blend.xy, fragment_shadow_position.xy, shadow, MagFilter=linear, MinFilter=linear
-	};
-#endif
-#endif
+	float2 frac_pos = fragment_shadow_position.xy / g_shadow_pixel_size + float2(0.5f, 0.5f);
+	blend.xy = frac(frac_pos);
 	blend.zw= 1.0f - blend.xy;
 //	blend.xy= 1.0f - blend.zw;
 	
 //	blend.xyzw= 1.0f;										// point-sampled filter
 	
 	// old code here
-//	texel1= texel1 * pixel_size;
+//	texel1= texel1 * g_shadow_pixel_size;
 	
-/*	texel1= (texel1 + 0.5)* pixel_size;
-	float2 texel0= texel1 - pixel_size;
-	float2 texel2= texel1 + pixel_size;
-//	float2 texel3= texel2 + pixel_size;
+/*	texel1= (texel1 + 0.5)* g_shadow_pixel_size;
+	float2 texel0= texel1 - g_shadow_pixel_size;
+	float2 texel2= texel1 + g_shadow_pixel_size;
+//	float2 texel3= texel2 + g_shadow_pixel_size;
 */
 /*	
 #define offset_0 -1.5f

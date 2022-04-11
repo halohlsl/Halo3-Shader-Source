@@ -6,7 +6,7 @@
 #include "postprocess.fx"
 //@generate screen
 
-LOCAL_SAMPLER_2D(source_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(source_sampler, 0);
 
 float4 default_ps(screen_output IN) : SV_Target
 {
@@ -23,27 +23,27 @@ float4 default_ps(screen_output IN) : SV_Target
  	float4 color= sample2D(source_sampler, sample0);
  	color*= color;
  	float4 accum= color;
-	sample0.x += pixel_size.x;		color= sample2D(source_sampler, sample0);		color *= color;		accum += color;
-	sample0.x += pixel_size.x;		color= sample2D(source_sampler, sample0);	 	color *= color;		accum += color;
-	sample0.x += pixel_size.x;		color= sample2D(source_sampler, sample0);	 	color *= color;		accum += color;
+	sample0.x += ps_postprocess_pixel_size.x;		color= sample2D(source_sampler, sample0);		color *= color;		accum += color;
+	sample0.x += ps_postprocess_pixel_size.x;		color= sample2D(source_sampler, sample0);	 	color *= color;		accum += color;
+	sample0.x += ps_postprocess_pixel_size.x;		color= sample2D(source_sampler, sample0);	 	color *= color;		accum += color;
 
 	sample0.x= startx;
-	sample0.y += pixel_size.y;		color= sample2D(source_sampler, sample0);		color *= color;		accum += color;
-	sample0.x += pixel_size.x;		color= sample2D(source_sampler, sample0);	 	color *= color;		accum += color;
-	sample0.x += pixel_size.x;		color= sample2D(source_sampler, sample0);	 	color *= color;		accum += color;
-	sample0.x += pixel_size.x;		color= sample2D(source_sampler, sample0);	 	color *= color;		accum += color;
+	sample0.y += ps_postprocess_pixel_size.y;		color= sample2D(source_sampler, sample0);		color *= color;		accum += color;
+	sample0.x += ps_postprocess_pixel_size.x;		color= sample2D(source_sampler, sample0);	 	color *= color;		accum += color;
+	sample0.x += ps_postprocess_pixel_size.x;		color= sample2D(source_sampler, sample0);	 	color *= color;		accum += color;
+	sample0.x += ps_postprocess_pixel_size.x;		color= sample2D(source_sampler, sample0);	 	color *= color;		accum += color;
 
 	sample0.x= startx;
-	sample0.y += pixel_size.y;		color= sample2D(source_sampler, sample0);		color *= color;		accum += color;
-	sample0.x += pixel_size.x;		color= sample2D(source_sampler, sample0);	 	color *= color;		accum += color;
-	sample0.x += pixel_size.x;		color= sample2D(source_sampler, sample0);	 	color *= color;		accum += color;
-	sample0.x += pixel_size.x;		color= sample2D(source_sampler, sample0);	 	color *= color;		accum += color;
+	sample0.y += ps_postprocess_pixel_size.y;		color= sample2D(source_sampler, sample0);		color *= color;		accum += color;
+	sample0.x += ps_postprocess_pixel_size.x;		color= sample2D(source_sampler, sample0);	 	color *= color;		accum += color;
+	sample0.x += ps_postprocess_pixel_size.x;		color= sample2D(source_sampler, sample0);	 	color *= color;		accum += color;
+	sample0.x += ps_postprocess_pixel_size.x;		color= sample2D(source_sampler, sample0);	 	color *= color;		accum += color;
 
 	sample0.x= startx;
-	sample0.y += pixel_size.y;		color= sample2D(source_sampler, sample0);		color *= color;		accum += color;
-	sample0.x += pixel_size.x;		color= sample2D(source_sampler, sample0);	 	color *= color;		accum += color;
-	sample0.x += pixel_size.x;		color= sample2D(source_sampler, sample0);	 	color *= color;		accum += color;
-	sample0.x += pixel_size.x;		color= sample2D(source_sampler, sample0);	 	color *= color;		accum += color;
+	sample0.y += ps_postprocess_pixel_size.y;		color= sample2D(source_sampler, sample0);		color *= color;		accum += color;
+	sample0.x += ps_postprocess_pixel_size.x;		color= sample2D(source_sampler, sample0);	 	color *= color;		accum += color;
+	sample0.x += ps_postprocess_pixel_size.x;		color= sample2D(source_sampler, sample0);	 	color *= color;		accum += color;
+	sample0.x += ps_postprocess_pixel_size.x;		color= sample2D(source_sampler, sample0);	 	color *= color;		accum += color;
 
 	color= color / (16);
 

@@ -9,7 +9,7 @@
 #include "apply_color_matrix_registers.fx"
 //@generate screen
 
-LOCAL_SAMPLER_2D(source_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(source_sampler, 0);
 
 
 // pixel fragment entry points

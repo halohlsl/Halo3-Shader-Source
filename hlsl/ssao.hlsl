@@ -6,8 +6,8 @@
 
 //@generate screen
 
-LOCAL_SAMPLER_2D(depth_sampler, 0);
-LOCAL_SAMPLER_2D(normal_sampler, 1);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_ALLWAYS(depth_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_ALLWAYS(normal_sampler, 1);
 LOCAL_SAMPLER_2D(noise_sampler, 2);
 
 #define SSAO_MASK

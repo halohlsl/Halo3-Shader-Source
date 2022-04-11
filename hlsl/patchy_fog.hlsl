@@ -57,7 +57,7 @@ s_vertex_out default_vs(
 // Noise texture sampled for fog density
 LOCAL_SAMPLER_2D(tex_noise, 0);
 // Scene depth texture sampled to fade fog near scene intersections
-LOCAL_SAMPLER_2D(tex_scene_depth, 1);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_ALLWAYS(tex_scene_depth, 1);
 
 #define SUN_DIR						atmosphere_constant_0.xyz
 #define SUN_INTENSITY_OVER_TM		atmosphere_constant_1.xyz  // SUN_INTENSITY / TOTAL_MIE

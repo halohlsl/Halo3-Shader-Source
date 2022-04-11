@@ -11,7 +11,7 @@
 #include "custom_gamma_correct_registers.fx"
 //@generate screen
 
-LOCAL_SAMPLER_2D(surface_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(surface_sampler, 0);
 
 // pixel fragment entry points
 float4 default_ps(screen_output IN) : SV_Target
@@ -27,5 +27,5 @@ float4 default_ps(screen_output IN) : SV_Target
 	
 	// apply custom gamma
 	pixel.rgb= pow(pixel.rgb, 1.95f);
-	return pixel*scale*IN.color;
+	return pixel*ps_postprocess_scale*IN.color;
 }

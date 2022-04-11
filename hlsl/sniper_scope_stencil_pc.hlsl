@@ -9,6 +9,6 @@
 
 float4 default_ps(screen_output IN) : SV_Target
 {
-  float4 result= float4(0, 1, 0, 1);
-	return scale * result;
+	float4 result= float4(0, 1, 0, 1);
+	return ps_postprocess_scale * result;
 }

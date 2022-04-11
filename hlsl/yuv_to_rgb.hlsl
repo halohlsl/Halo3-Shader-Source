@@ -6,10 +6,10 @@
 #include "yuv_to_rgb_registers.fx"
 //@generate screen
 
-LOCAL_SAMPLER_2D(tex0, 0);
-LOCAL_SAMPLER_2D(tex1, 1);
-LOCAL_SAMPLER_2D(tex2, 2);
-LOCAL_SAMPLER_2D(tex3, 3);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(tex0, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(tex1, 1);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(tex2, 2);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(tex3, 3);
 
 float4 default_ps(screen_output IN) : SV_Target
 {                               

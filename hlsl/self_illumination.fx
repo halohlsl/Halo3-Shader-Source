@@ -158,6 +158,20 @@ float3 calc_self_illumination_times_diffuse_ps(
 
 }
 
+float3 calc_self_illumination_holograms_ps(
+	in float2 texcoord,
+	inout float3 albedo,
+	in float3 view_dir)
+{
+	float3 self_illum_texture_sample= sample2D(self_illum_map, transform_texcoord(texcoord, self_illum_map_xform)).rgb;
+	
+	float albedo_blend= max(self_illum_texture_sample.g * 10.0 - 9.0, 0.0);
+	float3 albedo_part= albedo_blend + (1-albedo_blend) * albedo;
+	float3 self_illum= albedo_part * self_illum_color.xyz * self_illum_intensity * self_illum_texture_sample;
+	
+	return(self_illum);
+}
+
 float3 calc_self_illumination_change_color_ps(
 	in float2 texcoord,
 	inout float3 albedo,

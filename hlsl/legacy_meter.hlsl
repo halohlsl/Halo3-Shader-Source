@@ -7,7 +7,7 @@
 #include "legacy_meter_registers.fx"
 //@generate screen
 
-LOCAL_SAMPLER_2D(source_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(source_sampler, 0);
 
 //float4 gradient_min_color; // get from HUD cuscolor2
 //float4 gradient_max_color; // get from HUD cuscolor3
@@ -64,7 +64,7 @@ float4 default_ps(screen_output IN) : SV_Target
 	//T0a= T0a + T1a*T2b
 	float result_alpha= t0.a + mask_amount*t1a;
 	
-	result_alpha= scale.w*result_alpha;
+	result_alpha= ps_postprocess_scale.w*result_alpha;
 
 	//---
 	//---

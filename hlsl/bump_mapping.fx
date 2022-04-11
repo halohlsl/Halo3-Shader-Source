@@ -20,7 +20,7 @@ PARAM(float, bump_detail_masked_coefficient);
 float3 sample_bumpmap(in texture_sampler_2d bump_map, in float2 texcoord)
 {
 #ifdef pc
-	float3 bump= sample2D(bump_map, texcoord).rgb;
+	float3 bump= sampleBiasGlobal2D(bump_map, texcoord).rgb;
    bump.xy = BUMP_CONVERT(bump.xy);
 #else					// xenon compressed bump textures don't calculate z automatically
 	float4 bump;

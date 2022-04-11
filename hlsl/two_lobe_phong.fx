@@ -54,8 +54,8 @@ void calculate_fresnel_tint_map(
 {
 	//float n_dot_v = dot( normal_dir, view_dir );
 
-    float3 nst = sample2D(normal_specular_tint_map, texcoord).xyz * normal_specular_tint;
-    float3 gst = sample2D(glancing_specular_tint_map, texcoord).xyz * glancing_specular_tint;
+    float3 nst = sampleBiasGlobal2D(normal_specular_tint_map, texcoord).xyz * normal_specular_tint;
+    float3 gst = sampleBiasGlobal2D(glancing_specular_tint_map, texcoord).xyz * glancing_specular_tint;
 
     float n_dot_v = max(dot( normal_dir, view_dir ), 0.0f);
     float fresnel_blend= pow((1.0f - n_dot_v ), fresnel_curve_steepness); 
@@ -154,7 +154,7 @@ void calc_material_analytic_specular_two_lobe_phong_tint_map_ps(
 	float power_or_roughness= 0.0f;
 	specular_fresnel_color= 0.0f;
 	calculate_fresnel_tint_map(texcoord, view_dir, normal_dir, diffuse_albedo_color, power_or_roughness, specular_fresnel_color);
-	specular_albedo_color= sample2D(normal_specular_tint_map, texcoord).xyz;
+	specular_albedo_color= sampleBiasGlobal2D(normal_specular_tint_map, texcoord).xyz;
 	material_parameters.rgb= float3(specular_coefficient, albedo_specular_tint_blend, environment_map_specular_contribution);
 	material_parameters.a= power_or_roughness;
     

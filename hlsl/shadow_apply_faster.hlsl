@@ -21,14 +21,9 @@ float sample_percentage_closer_PCF_2x2_block(float3 fragment_shadow_position, fl
 	float4 blend= 1.0f;
 	float scale= 1.0f / 4.0f;
 //#ifdef BILINEAR_SHADOWS
-   #ifdef pc
-      float2 frac_pos = fragment_shadow_position.xy / pixel_size + float2(0.5, 0.5);
-      blend.xy = frac(frac_pos);
-   #else
-	   asm {
-		   getWeights2D blend.xy, fragment_shadow_position.xy, shadow, MagFilter=linear, MinFilter=linear, OffsetX=0.5, OffsetY=0.5
-	   };
-   #endif
+	float2 frac_pos = fragment_shadow_position.xy / g_shadow_pixel_size + float2(0.5, 0.5);
+	blend.xy = frac(frac_pos);
+
 	blend.zw= 1.0f - blend.xy;
 	scale = 1.0f;
 //#endif // BILINEAR_SHADOWS

@@ -4,6 +4,7 @@
 #include "postprocess_registers.fx"
 
 #ifndef USE_CUSTOM_POSTPROCESS_CONSTANTS
+#define PIXEL_SIZE ps_postprocess_pixel_size
 #include "texture.fx"
 #endif
 

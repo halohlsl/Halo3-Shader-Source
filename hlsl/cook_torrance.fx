@@ -257,7 +257,7 @@ void calc_material_analytic_specular_cook_torrance_ps(
 	if (use_material_texture)
 	{	
 		//over ride shader supplied values with what's from the texture
-		spatially_varying_material_parameters= sample2D(material_texture, transform_texcoord(texcoord, material_texture_xform));				
+		spatially_varying_material_parameters= sampleBiasGlobal2D(material_texture, transform_texcoord(texcoord, material_texture_xform));				
 	}
 
 	specular_albedo_color= diffuse_albedo_color * spatially_varying_material_parameters.g + fresnel_color * (1-spatially_varying_material_parameters.g);
@@ -335,7 +335,7 @@ void calc_material_analytic_specular_cook_torrance_two_color_spec_tint_ps(
 	if (use_material_texture)
 	{	
 		//over ride shader supplied values with what's from the texture
-		spatially_varying_material_parameters= sample2D(material_texture, transform_texcoord(texcoord, material_texture_xform));				
+		spatially_varying_material_parameters= sampleBiasGlobal2D(material_texture, transform_texcoord(texcoord, material_texture_xform));				
 	}
 
 	specular_albedo_color= diffuse_albedo_color * spatially_varying_material_parameters.g + fresnel_color * (1-spatially_varying_material_parameters.g);
@@ -403,7 +403,7 @@ void calc_material_analytic_specular_cook_torrance_pbr_maps_ps(
 	// the following parameters can be supplied in the material texture
 	// r: specular coefficient
 	// g: roughless
-	spatially_varying_material_parameters= sample2D(material_texture, transform_texcoord(texcoord, material_texture_xform)).xxyy;
+	spatially_varying_material_parameters= sampleBiasGlobal2D(material_texture, transform_texcoord(texcoord, material_texture_xform)).xxyy;
 	spatially_varying_material_parameters.y = albedo_blend;
 	spatially_varying_material_parameters.z = environment_map_specular_contribution;
 
@@ -478,7 +478,7 @@ void calc_material_analytic_specular_cook_torrance_custom_cube_ps(
 	if (use_material_texture)
 	{	
 		//over ride shader supplied values with what's from the texture
-		spatially_varying_material_parameters= sample2D(material_texture, transform_texcoord(texcoord, material_texture_xform));				
+		spatially_varying_material_parameters= sampleBiasGlobal2D(material_texture, transform_texcoord(texcoord, material_texture_xform));				
 	}
 
 	specular_albedo_color= diffuse_albedo_color * spatially_varying_material_parameters.g + fresnel_color * (1-spatially_varying_material_parameters.g);
@@ -552,7 +552,7 @@ void calc_material_analytic_specular_cook_torrance_scrolling_cube_mask_ps(
 	if (use_material_texture)
 	{
 		//over ride shader supplied values with what's from the texture
-		spatially_varying_material_parameters = sample2D(material_texture, transform_texcoord(texcoord, material_texture_xform));
+		spatially_varying_material_parameters = sampleBiasGlobal2D(material_texture, transform_texcoord(texcoord, material_texture_xform));
 	}
 
 	specular_albedo_color = diffuse_albedo_color * spatially_varying_material_parameters.g + fresnel_color * (1 - spatially_varying_material_parameters.g);
@@ -626,7 +626,7 @@ void calc_material_analytic_specular_cook_torrance_scrolling_cube_ps(
 	if (use_material_texture)
 	{
 		//over ride shader supplied values with what's from the texture
-		spatially_varying_material_parameters = sample2D(material_texture, transform_texcoord(texcoord, material_texture_xform));
+		spatially_varying_material_parameters = sampleBiasGlobal2D(material_texture, transform_texcoord(texcoord, material_texture_xform));
 	}
 
 	specular_albedo_color = diffuse_albedo_color * spatially_varying_material_parameters.g + fresnel_color * (1 - spatially_varying_material_parameters.g);
@@ -700,7 +700,7 @@ void calc_material_analytic_specular_cook_torrance_from_albedo_ps(
 	if (use_material_texture)
 	{
 		//over ride shader supplied values with what's from the texture
-		spatially_varying_material_parameters = sample2D(material_texture, transform_texcoord(texcoord, material_texture_xform));
+		spatially_varying_material_parameters = sampleBiasGlobal2D(material_texture, transform_texcoord(texcoord, material_texture_xform));
 	}
 
 	specular_albedo_color = diffuse_albedo_color * spatially_varying_material_parameters.g + fresnel_color * (1 - spatially_varying_material_parameters.g);
@@ -774,7 +774,7 @@ void calc_material_analytic_specular_cook_torrance_rim_fresnel_ps(
 	if (use_material_texture)
 	{	
 		//over ride shader supplied values with what's from the texture
-		spatially_varying_material_parameters *= sample2D(material_texture, transform_texcoord(texcoord, material_texture_xform));
+		spatially_varying_material_parameters *= sampleBiasGlobal2D(material_texture, transform_texcoord(texcoord, material_texture_xform));
 	}
 
 	specular_albedo_color= diffuse_albedo_color * spatially_varying_material_parameters.g + fresnel_color * (1-spatially_varying_material_parameters.g);
@@ -1204,7 +1204,7 @@ void calc_material_cook_torrance_custom_cube_ps(
 	inout float3 diffuse_radiance
 )
 {
-	float3 custom_spec_tint = sampleCUBE(custom_cube, view_normal).xyz;
+	float3 custom_spec_tint = sampleBiasGlobalCUBE(custom_cube, view_normal).xyz;
 
 	calc_material_cook_torrance_base(view_dir, fragment_to_camera_world, view_normal, view_reflect_dir_world, sh_lighting_coefficients, view_light_dir, light_color, albedo_color, specular_mask, texcoord, prt_ravi_diff, tangent_frame, misc, custom_spec_tint, envmap_specular_reflectance_and_roughness, envmap_area_specular_only, specular_color, diffuse_radiance);
 }
@@ -1232,7 +1232,7 @@ void calc_material_cook_torrance_scrolling_cube_mask_ps(
 	inout float3 diffuse_radiance
 )
 {
-	float3 spec_blend = sampleCUBE(tint_blend_mask_cubemap, misc).xyz;
+	float3 spec_blend = sampleBiasGlobalCUBE(tint_blend_mask_cubemap, misc).xyz;
 	float3 spec_tint = spec_blend.y * specular_tint * 2 + spec_blend.z * specular_second_tint * 2;
 
 	calc_material_cook_torrance_base(view_dir, fragment_to_camera_world, view_normal, view_reflect_dir_world, sh_lighting_coefficients, view_light_dir, light_color, albedo_color, specular_mask, texcoord, prt_ravi_diff, tangent_frame, misc, spec_tint, envmap_specular_reflectance_and_roughness, envmap_area_specular_only, specular_color, diffuse_radiance);
@@ -1260,7 +1260,7 @@ void calc_material_cook_torrance_scrolling_cube_ps(
 	inout float3 diffuse_radiance
 )
 {
-	float3 spec_tint = sampleCUBE(spec_tint_cubemap, misc).xyz;
+	float3 spec_tint = sampleBiasGlobalCUBE(spec_tint_cubemap, misc).xyz;
 
 	calc_material_cook_torrance_base(view_dir, fragment_to_camera_world, view_normal, view_reflect_dir_world, sh_lighting_coefficients, view_light_dir, light_color, albedo_color, specular_mask, texcoord, prt_ravi_diff, tangent_frame, misc, spec_tint, envmap_specular_reflectance_and_roughness, envmap_area_specular_only, specular_color, diffuse_radiance);
 }
@@ -1524,7 +1524,7 @@ void calc_material_cook_torrance_two_color_spec_tint_ps(
 	inout float3 diffuse_radiance
 )
 {
-	float3 spec_blend = sampleCUBE(spec_blend_map, view_normal).xyz;
+	float3 spec_blend = sampleBiasGlobalCUBE(spec_blend_map, view_normal).xyz;
 	float3 spec_tint = spec_blend.y * specular_tint * 2 + spec_blend.z * specular_second_tint * 2;
 
 	calc_material_cook_torrance_base(view_dir, fragment_to_camera_world, view_normal, view_reflect_dir_world, sh_lighting_coefficients, view_light_dir, light_color, albedo_color, specular_mask, texcoord, prt_ravi_diff, tangent_frame, misc, spec_tint, envmap_specular_reflectance_and_roughness, envmap_area_specular_only, specular_color, diffuse_radiance);
@@ -1552,7 +1552,7 @@ void calc_material_cook_torrance_pbr_maps_ps(
 	inout float3 diffuse_radiance
 )
 {
-	float3 spec_tint = sample2D(spec_tint_map, texcoord).xyz;
+	float3 spec_tint = sampleBiasGlobal2D(spec_tint_map, texcoord).xyz;
 
 #ifdef pc
 	if (p_shader_pc_specular_enabled!=0.f)

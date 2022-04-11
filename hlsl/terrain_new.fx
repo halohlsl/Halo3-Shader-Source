@@ -166,7 +166,7 @@ DECLARE_MATERIAL(3);
 float4 sample_blend_normalized(float2 texcoord)
 {
 
-	float4 blend= sample2D(blend_map, transform_texcoord(texcoord, blend_map_xform));
+	float4 blend= sampleBiasGlobal2D(blend_map, transform_texcoord(texcoord, blend_map_xform));
 	//blend += 0.00000001f;			// this gets rid of pure black pixels in the blend map.  We've decided that this isn't worth the instruction - just change your blend map
 
 	#if MORPH_DYNAMIC(blend_type)
@@ -215,11 +215,11 @@ void calc_bumpmap(
 	in float4 detail_bump_xform,
 	out float3 bump)
 {
-	bump= sample2D(bump_map, transform_texcoord(texcoord, bump_map_xform)).xyz;
+	bump= sampleBiasGlobal2D(bump_map, transform_texcoord(texcoord, bump_map_xform)).xyz;
 
 #if DETAIL_BUMP_ENABLED
    if (!bSelfIllum) {
-	float2 detail= sample2D(detail_bump, transform_texcoord(texcoord, detail_bump_xform)).xy;
+	float2 detail= sampleBiasGlobal2D(detail_bump, transform_texcoord(texcoord, detail_bump_xform)).xy;
 	bump.xy += detail.xy;
    }
 #endif
@@ -238,7 +238,7 @@ float4 calc_detail(
    if (bSelfIllum) {
       return 1.0f / DETAIL_MULTIPLIER;
    } else {
-      return sample2D(detail_map, transform_texcoord(texcoord, detail_map_xform));
+      return sampleBiasGlobal2D(detail_map, transform_texcoord(texcoord, detail_map_xform));
    }
 }
 
@@ -334,7 +334,7 @@ void albedo_vs(
 COMPILER_IFANY																																					\
 if (blend_amount > 0.0)																																			\
 {																																								\
-	float4 base=	sample2D(base_map_m_##material,	transform_texcoord(original_texcoord.xy, base_map_m_##material##_xform));									\
+	float4 base=	sampleBiasGlobal2D(base_map_m_##material,	transform_texcoord(original_texcoord.xy, base_map_m_##material##_xform));									\
 	float4 detail=	calc_detail(SELF_ILLUM_MATERIAL(material_##material##_type), original_texcoord, detail_map_m_##material, detail_map_m_##material##_xform);	\
 	albedo_accumulate += base * detail * blendweight;																											\
 	{																																							\
@@ -647,8 +647,8 @@ float3 blend_self_illum(
 	in float3 self_illum_color,
 	in float self_illum_intensity)
 {
-	float3 self_illum = sample2D(self_illum_map, transform_texcoord(texcoord, self_illum_map_xform)).rgb;
-	float3 self_illum_detail = sample2D(self_illum_detail_map, transform_texcoord(texcoord, self_illum_detail_map_xform)).rgb;
+	float3 self_illum = sampleBiasGlobal2D(self_illum_map, transform_texcoord(texcoord, self_illum_map_xform)).rgb;
+	float3 self_illum_detail = sampleBiasGlobal2D(self_illum_detail_map, transform_texcoord(texcoord, self_illum_detail_map_xform)).rgb;
 	float3 result = self_illum * (self_illum_detail * DETAIL_MULTIPLIER) * self_illum_color;
 
 	result.rgb *= self_illum_intensity;
@@ -1582,7 +1582,7 @@ accum_pixel default_dynamic_light_ps(
 	fragment_position_shadow.xyz /= fragment_position_shadow.w;							// projective transform on xy coordinates
 	
 	// apply light gel
-	light_radiance *=  sample2D(dynamic_light_gel_texture, transform_texcoord(fragment_position_shadow.xy, p_dynamic_light_gel_xform));
+	light_radiance *=  sampleBiasGlobal2D(dynamic_light_gel_texture, transform_texcoord(fragment_position_shadow.xy, p_dynamic_light_gel_xform));
 	
 	float4 out_color= 0.0f;	
 	if (dot(light_radiance, light_radiance) > 0.0000001f)									// ###ctchou $PERF unproven 'performance' hack

@@ -6,9 +6,9 @@
 #include "postprocess.fx"
 //@generate screen
 
-LOCAL_SAMPLER_2D(source_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(source_sampler, 0);
 
-// scale = bloom_curve_constants
+// ps_postprocess_scale = bloom_curve_constants
 
 float4 default_ps(screen_output IN) : SV_Target
 {
@@ -22,7 +22,7 @@ float4 default_ps(screen_output IN) : SV_Target
 //	float overwhite= maximum-min(maximum, bloom_curve_constants.x);  // bloom_point
 //	color *= (overwhite/maximum) + bloom_curve_constants.y;	// inherent_bloom					// 0.1; //0.05;
 
-	float overwhite= max(maximum*scale.y, maximum-scale.x);
+	float overwhite= max(maximum*ps_postprocess_scale.y, maximum-ps_postprocess_scale.x);
 	color *= (overwhite/maximum);
 
 	return color / DARK_COLOR_MULTIPLIER; //convert_to_render_target(color, false);

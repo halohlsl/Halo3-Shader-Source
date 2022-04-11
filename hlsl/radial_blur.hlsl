@@ -7,7 +7,7 @@
 
 //@generate screen
 
-LOCAL_SAMPLER_2D(color_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(color_sampler, 0);
 
 float4 default_ps(
 	SCREEN_POSITION_INPUT(screen_position),

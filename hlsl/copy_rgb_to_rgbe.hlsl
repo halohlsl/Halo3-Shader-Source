@@ -6,10 +6,10 @@
 #include "postprocess.fx"
 //@generate screen
 
-LOCAL_SAMPLER_2D(source_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(source_sampler, 0);
 
 float4 default_ps(screen_output IN) : SV_Target
 {
  	float4 color= sample2D(source_sampler, IN.texcoord);
-	return color.rgba * scale.rgba; //RGB_to_RGBE(color.rgb * scale.rgb);
+	return color.rgba * ps_postprocess_scale.rgba; //RGB_to_RGBE(color.rgb * ps_postprocess_scale.rgb);
 }

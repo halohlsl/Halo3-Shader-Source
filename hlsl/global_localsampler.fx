@@ -15,9 +15,16 @@
 	_texture_type<float4> LocalTexture_##_name : register(t##_slot);		\
 	sampler LocalSampler_##_name : register(s##_slot);						\
 	static _struct_type _name = { LocalSampler_##_name, LocalTexture_##_name }
+
+#define DECLARE_LOCAL_SAMPLER_VIEWPORT(_name, _slot, _texture_type, _struct_type, _with_vieport)	\
+	_texture_type<float4> LocalTexture_##_name : register(t##_slot);		\
+	sampler LocalSampler_##_name : register(s##_slot);						\
+	static _struct_type _name = { LocalSampler_##_name, LocalTexture_##_name, _with_vieport }
 	
 #define LOCAL_SAMPLER_2D(_name, _slot) DECLARE_LOCAL_SAMPLER(_name, _slot, texture2D, texture_sampler_2d)
-#define LOCAL_SAMPLER_COMPARISON_2D(_name, _slot) DECLARE_LOCAL_SAMPLER(_name, _slot, texture2D, texture_comparison_sampler_2d) 
+#define LOCAL_SAMPLER_COMPARISON_2D(_name, _slot) DECLARE_LOCAL_SAMPLER(_name, _slot, texture2D, texture_comparison_sampler_2d)
+#define LOCAL_SAMPLER_2D_IN_VIEWPORT_ALLWAYS(_name, _slot) DECLARE_LOCAL_SAMPLER_VIEWPORT(_name, _slot, texture2D, viewport_texture_sampler_2d, true)
+#define LOCAL_SAMPLER_COMPARISON_2D_VIEWPORT(_name, _slot, _with_vieport) DECLARE_LOCAL_SAMPLER_VIEWPORT(_name, _slot, texture2D, viewport_texture_comparison_sampler_2d, _with_vieport) 
 #define LOCAL_SAMPLER_3D(_name, _slot) DECLARE_LOCAL_SAMPLER(_name, _slot, texture3D, texture_sampler_3d)
 #define LOCAL_SAMPLER_CUBE(_name, _slot) DECLARE_LOCAL_SAMPLER(_name, _slot, TextureCube, texture_sampler_cube)
 

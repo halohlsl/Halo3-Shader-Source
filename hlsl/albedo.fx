@@ -1,4 +1,3 @@
-
 #define DETAIL_MULTIPLIER 4.59479f
 // 4.59479f == 2 ^ 2.2  (sRGB gamma)
 
@@ -80,8 +79,8 @@ void calc_albedo_default_ps(
 	in float3 normal,
 	in float4 misc)
 {
-	float4	base=	sample2D(base_map,   transform_texcoord(texcoord, base_map_xform));
-	float4	detail=	sample2D(detail_map, transform_texcoord(texcoord, detail_map_xform));
+	float4	base=	sampleBiasGlobal2D(base_map,   transform_texcoord(texcoord, base_map_xform));
+	float4	detail=	sampleBiasGlobal2D(detail_map, transform_texcoord(texcoord, detail_map_xform));
 
 	albedo.rgb= base.rgb * (detail.rgb * DETAIL_MULTIPLIER) * albedo_color.rgb;
 	albedo.w= base.w*detail.w*albedo_color.w;
@@ -98,9 +97,9 @@ void calc_albedo_detail_blend_ps(
 	in float3 normal,
 	in float4 misc)
 {
-	float4	base=	sample2D(base_map,		transform_texcoord(texcoord, base_map_xform));
-	float4	detail=	sample2D(detail_map,	transform_texcoord(texcoord, detail_map_xform));	
-	float4	detail2= sample2D(detail_map2,	transform_texcoord(texcoord, detail_map2_xform));
+	float4	base=	sampleBiasGlobal2D(base_map,		transform_texcoord(texcoord, base_map_xform));
+	float4	detail=	sampleBiasGlobal2D(detail_map,	transform_texcoord(texcoord, detail_map_xform));	
+	float4	detail2= sampleBiasGlobal2D(detail_map2,	transform_texcoord(texcoord, detail_map2_xform));
 
 	albedo.xyz= (1.0f-base.w)*detail.xyz + base.w*detail2.xyz;
 	albedo.xyz= DETAIL_MULTIPLIER * base.xyz*albedo.xyz;
@@ -118,10 +117,10 @@ void calc_albedo_three_detail_blend_ps(
 	in float3 normal,
 	in float4 misc)
 {
-	float4 base=	sample2D(base_map,		transform_texcoord(texcoord, base_map_xform));
-	float4 detail1= sample2D(detail_map,	transform_texcoord(texcoord, detail_map_xform));
-	float4 detail2= sample2D(detail_map2,	transform_texcoord(texcoord, detail_map2_xform));
-	float4 detail3= sample2D(detail_map3,	transform_texcoord(texcoord, detail_map3_xform));
+	float4 base=	sampleBiasGlobal2D(base_map,		transform_texcoord(texcoord, base_map_xform));
+	float4 detail1= sampleBiasGlobal2D(detail_map,	transform_texcoord(texcoord, detail_map_xform));
+	float4 detail2= sampleBiasGlobal2D(detail_map2,	transform_texcoord(texcoord, detail_map2_xform));
+	float4 detail3= sampleBiasGlobal2D(detail_map3,	transform_texcoord(texcoord, detail_map3_xform));
 
 	float blend1= saturate(2.0f*base.w);
 	float blend2= saturate(2.0f*base.w - 1.0f);
@@ -148,9 +147,9 @@ void calc_albedo_two_change_color_ps(
 	in float3 normal,
 	in float4 misc)
 {
-	float4 base=			sample2D(base_map,			transform_texcoord(texcoord, base_map_xform));
-	float4 detail=			sample2D(detail_map,		transform_texcoord(texcoord, detail_map_xform));
-	float4 change_color=	sample2D(change_color_map, 	transform_texcoord(texcoord, change_color_map_xform));
+	float4 base=			sampleBiasGlobal2D(base_map,			transform_texcoord(texcoord, base_map_xform));
+	float4 detail=			sampleBiasGlobal2D(detail_map,		transform_texcoord(texcoord, detail_map_xform));
+	float4 change_color=	sampleBiasGlobal2D(change_color_map, 	transform_texcoord(texcoord, change_color_map_xform));
 
 	change_color.xyz=	((1.0f-change_color.x) + change_color.x*primary_change_color.xyz)*
 						((1.0f-change_color.y) + change_color.y*secondary_change_color.xyz);
@@ -167,9 +166,9 @@ void calc_albedo_four_change_color_ps(
 	in float3 normal,
 	in float4 misc)
 {
-	float4 base=			sample2D(base_map,			transform_texcoord(texcoord, base_map_xform));
-	float4 detail=			sample2D(detail_map,		transform_texcoord(texcoord, detail_map_xform));
-	float4 change_color=	sample2D(change_color_map,	transform_texcoord(texcoord, change_color_map_xform));
+	float4 base=			sampleBiasGlobal2D(base_map,			transform_texcoord(texcoord, base_map_xform));
+	float4 detail=			sampleBiasGlobal2D(detail_map,		transform_texcoord(texcoord, detail_map_xform));
+	float4 change_color=	sampleBiasGlobal2D(change_color_map,	transform_texcoord(texcoord, change_color_map_xform));
 
 	change_color.xyz=	((1.0f-change_color.x) + change_color.x*primary_change_color.xyz)	*
 						((1.0f-change_color.y) + change_color.y*secondary_change_color.xyz)	*
@@ -192,10 +191,10 @@ void calc_albedo_two_detail_overlay_ps(
 	in float3 normal,
 	in float4 misc)
 {
-	float4	base=				sample2D(base_map,				transform_texcoord(texcoord, base_map_xform));
-	float4	detail=				sample2D(detail_map,			transform_texcoord(texcoord, detail_map_xform));	
-	float4	detail2=			sample2D(detail_map2,			transform_texcoord(texcoord, detail_map2_xform));
-	float4	detail_overlay=		sample2D(detail_map_overlay,	transform_texcoord(texcoord, detail_map_overlay_xform));
+	float4	base=				sampleBiasGlobal2D(base_map,				transform_texcoord(texcoord, base_map_xform));
+	float4	detail=				sampleBiasGlobal2D(detail_map,			transform_texcoord(texcoord, detail_map_xform));	
+	float4	detail2=			sampleBiasGlobal2D(detail_map2,			transform_texcoord(texcoord, detail_map2_xform));
+	float4	detail_overlay=		sampleBiasGlobal2D(detail_map_overlay,	transform_texcoord(texcoord, detail_map_overlay_xform));
 
 	float4 detail_blend= (1.0f-base.w)*detail + base.w*detail2;
 	
@@ -212,9 +211,9 @@ void calc_albedo_two_detail_ps(
 	in float3 normal,
 	in float4 misc)
 {
-	float4	base=				sample2D(base_map,				transform_texcoord(texcoord, base_map_xform));
-	float4	detail=				sample2D(detail_map,			transform_texcoord(texcoord, detail_map_xform));	
-	float4	detail2=			sample2D(detail_map2,			transform_texcoord(texcoord, detail_map2_xform));
+	float4	base=				sampleBiasGlobal2D(base_map,				transform_texcoord(texcoord, base_map_xform));
+	float4	detail=				sampleBiasGlobal2D(detail_map,			transform_texcoord(texcoord, detail_map_xform));	
+	float4	detail2=			sampleBiasGlobal2D(detail_map2,			transform_texcoord(texcoord, detail_map2_xform));
 	
 	albedo.xyz= base.xyz * (DETAIL_MULTIPLIER * DETAIL_MULTIPLIER) * detail.xyz * detail2.xyz;
 	albedo.w= base.w * detail.w * detail2.w;
@@ -233,9 +232,9 @@ void calc_albedo_color_mask_ps(
 	in float3 normal,
 	in float4 misc)
 {
-	float4	base=	sample2D(base_map,   transform_texcoord(texcoord, base_map_xform));
-	float4	detail=	sample2D(detail_map, transform_texcoord(texcoord, detail_map_xform));
-	float4  color_mask=	sample2D(color_mask_map,	transform_texcoord(texcoord, color_mask_map_xform));
+	float4	base=	sampleBiasGlobal2D(base_map,   transform_texcoord(texcoord, base_map_xform));
+	float4	detail=	sampleBiasGlobal2D(detail_map, transform_texcoord(texcoord, detail_map_xform));
+	float4  color_mask=	sampleBiasGlobal2D(color_mask_map,	transform_texcoord(texcoord, color_mask_map_xform));
 
 	float4 tint_color=	((1.0f-color_mask.x) + color_mask.x * albedo_color.xyzw / float4(neutral_gray.xyz, 1.0f))		*		// ###ctchou $PERF do this divide in the pre-process
 						((1.0f-color_mask.y) + color_mask.y * albedo_color2.xyzw / float4(neutral_gray.xyz, 1.0f))		*
@@ -253,9 +252,9 @@ void calc_albedo_two_detail_black_point_ps(
 	in float3 normal,
 	in float4 misc)
 {
-	float4	base=				sample2D(base_map,				transform_texcoord(texcoord, base_map_xform));
-	float4	detail=				sample2D(detail_map,			transform_texcoord(texcoord, detail_map_xform));	
-	float4	detail2=			sample2D(detail_map2,			transform_texcoord(texcoord, detail_map2_xform));
+	float4	base=				sampleBiasGlobal2D(base_map,				transform_texcoord(texcoord, base_map_xform));
+	float4	detail=				sampleBiasGlobal2D(detail_map,			transform_texcoord(texcoord, detail_map_xform));	
+	float4	detail2=			sampleBiasGlobal2D(detail_map2,			transform_texcoord(texcoord, detail_map2_xform));
 	
 	albedo.xyz= base.xyz * (DETAIL_MULTIPLIER * DETAIL_MULTIPLIER) * detail.xyz * detail2.xyz;
 	albedo.w= apply_black_point(base.w, detail.w * detail2.w);
@@ -271,8 +270,8 @@ void calc_albedo_custom_cube_ps(
 	in float3 normal,
 	in float4 misc)
 {
-	float4 base = sample2D(base_map,   transform_texcoord(texcoord, base_map_xform));
-	float4 custom_color = sampleCUBE(custom_cube, normal);
+	float4 base = sampleBiasGlobal2D(base_map,   transform_texcoord(texcoord, base_map_xform));
+	float4 custom_color = sampleBiasGlobalCUBE(custom_cube, normal);
 
 	albedo.rgb= base.rgb * custom_color.xyz;
 	albedo.w= base.w * albedo_color.w;
@@ -289,9 +288,9 @@ void calc_albedo_two_color_ps(
 	in float3 normal,
 	in float4 misc)
 {
-	float4 base = sample2D(base_map, transform_texcoord(texcoord, base_map_xform));
+	float4 base = sampleBiasGlobal2D(base_map, transform_texcoord(texcoord, base_map_xform));
 
-	float4 blend_factor = sampleCUBE(blend_map, normal);
+	float4 blend_factor = sampleBiasGlobalCUBE(blend_map, normal);
 
 	float4 color = blend_factor.y * albedo_color * 2 + blend_factor.z * albedo_second_color * 2;
 
@@ -340,9 +339,9 @@ void calc_albedo_chameleon_ps(
 	in float2 vPos = float2(0.0f, 0.0f))
 {
 	float3 color = calc_chameleon(normal, view_dir);
-	float4	base = sample2D(base_map, transform_texcoord(texcoord, base_map_xform));
+	float4	base = sampleBiasGlobal2D(base_map, transform_texcoord(texcoord, base_map_xform));
 
-	float4	detail = sample2D(detail_map, transform_texcoord(texcoord, detail_map_xform));
+	float4	detail = sampleBiasGlobal2D(detail_map, transform_texcoord(texcoord, detail_map_xform));
 	albedo.rgb = base.rgb * (detail.rgb * DETAIL_MULTIPLIER) * color.rgb;
 	albedo.w = base.w*detail.w;
 
@@ -360,10 +359,10 @@ void calc_albedo_chameleon_masked_ps(
 	in float3 view_dir = float3(0.0f, 0.0f, 0.0f),
 	in float2 vPos = float2(0.0f, 0.0f))
 {
-	float4 base = sample2D(base_map, transform_texcoord(texcoord, base_map_xform));
-	float mask = sample2D(chameleon_mask_map, transform_texcoord(texcoord, chameleon_mask_map_xform)).r;
+	float4 base = sampleBiasGlobal2D(base_map, transform_texcoord(texcoord, base_map_xform));
+	float mask = sampleBiasGlobal2D(chameleon_mask_map, transform_texcoord(texcoord, chameleon_mask_map_xform)).r;
 	float3 color = lerp(1.0f, calc_chameleon(normal, view_dir), mask);
-	float4 detail = sample2D(detail_map, transform_texcoord(texcoord, detail_map_xform));
+	float4 detail = sampleBiasGlobal2D(detail_map, transform_texcoord(texcoord, detail_map_xform));
 	albedo.rgb = base.rgb * (detail.rgb * DETAIL_MULTIPLIER) * color.rgb;
 	albedo.w = base.w*detail.w;
 
@@ -382,9 +381,9 @@ void calc_albedo_chameleon_albedo_masked_ps(
 	in float3 view_dir = float3(0.0f, 0.0f, 0.0f),
 	in float2 vPos = float2(0.0f, 0.0f))
 {
-	float4 base = sample2D(base_map, transform_texcoord(texcoord, base_map_xform)) * albedo_color;
-	float4 base_masked = sample2D(base_masked_map, transform_texcoord(texcoord, base_masked_map_xform)) * albedo_masked_color;
-	float  mask = sample2D(chameleon_mask_map, transform_texcoord(texcoord, chameleon_mask_map_xform)).r;
+	float4 base = sampleBiasGlobal2D(base_map, transform_texcoord(texcoord, base_map_xform)) * albedo_color;
+	float4 base_masked = sampleBiasGlobal2D(base_masked_map, transform_texcoord(texcoord, base_masked_map_xform)) * albedo_masked_color;
+	float  mask = sampleBiasGlobal2D(chameleon_mask_map, transform_texcoord(texcoord, chameleon_mask_map_xform)).r;
 
 	base_masked.rgb *= calc_chameleon(normal, view_dir);
 
@@ -401,9 +400,9 @@ void calc_albedo_two_change_color_chameleon_ps(
 	in float3 view_dir = float3(0.0f, 0.0f, 0.0f),
 	in float2 vPos = float2(0.0f, 0.0f))
 {
-	float4 base = sample2D(base_map, transform_texcoord(texcoord, base_map_xform));
-	float4 detail = sample2D(detail_map, transform_texcoord(texcoord, detail_map_xform));
-	float4 change_color = sample2D(change_color_map, transform_texcoord(texcoord, change_color_map_xform));
+	float4 base = sampleBiasGlobal2D(base_map, transform_texcoord(texcoord, base_map_xform));
+	float4 detail = sampleBiasGlobal2D(detail_map, transform_texcoord(texcoord, detail_map_xform));
+	float4 change_color = sampleBiasGlobal2D(change_color_map, transform_texcoord(texcoord, change_color_map_xform));
 
 	float3 cur_primary_change_color = primary_change_color.rgb;
 	float3 cur_secondary_change_color = secondary_change_color.rgb;
@@ -432,9 +431,9 @@ void calc_albedo_two_change_color_anim_ps(
 	in float3 view_dir = float3(0.0f, 0.0f, 0.0f),
 	in float2 vPos = float2(0.0f, 0.0f))
 {
-	float4 base = sample2D(base_map, transform_texcoord(texcoord, base_map_xform));
-	float4 detail = sample2D(detail_map, transform_texcoord(texcoord, detail_map_xform));
-	float4 change_color = sample2D(change_color_map, transform_texcoord(texcoord, change_color_map_xform));
+	float4 base = sampleBiasGlobal2D(base_map, transform_texcoord(texcoord, base_map_xform));
+	float4 detail = sampleBiasGlobal2D(detail_map, transform_texcoord(texcoord, detail_map_xform));
+	float4 change_color = sampleBiasGlobal2D(change_color_map, transform_texcoord(texcoord, change_color_map_xform));
 
 	float3 cur_primary_change_color = primary_change_color.rgb;
 	float3 cur_secondary_change_color = secondary_change_color.rgb;
@@ -458,9 +457,9 @@ void calc_albedo_scrolling_cube_mask_ps(
 	in float3 normal,
 	in float4 misc)
 {
-	float4 base = sample2D(base_map, transform_texcoord(texcoord, base_map_xform));
+	float4 base = sampleBiasGlobal2D(base_map, transform_texcoord(texcoord, base_map_xform));
 
-	float4 blend_factor = sampleCUBE(color_blend_mask_cubemap, misc.xyz);
+	float4 blend_factor = sampleBiasGlobalCUBE(color_blend_mask_cubemap, misc.xyz);
 
 	float4 color = blend_factor.y * albedo_color * 2 + blend_factor.z * albedo_second_color * 2;
 
@@ -477,9 +476,9 @@ void calc_albedo_scrolling_cube_ps(
 	in float3 normal,
 	in float4 misc)
 {
-	float4 base = sample2D(base_map, transform_texcoord(texcoord, base_map_xform));
+	float4 base = sampleBiasGlobal2D(base_map, transform_texcoord(texcoord, base_map_xform));
 
-	float4 color = sampleCUBE(color_cubemap, misc.xyz);
+	float4 color = sampleBiasGlobalCUBE(color_cubemap, misc.xyz);
 
 	albedo.rgb = base.rgb * color.xyz;
 	albedo.w = base.w * color.w;
@@ -497,10 +496,10 @@ void calc_albedo_scrolling_texture_uv_ps(
 	in float4 misc)
 {
 	float2 transformed_texcoord = transform_texcoord(texcoord, base_map_xform);
-	float4 base = sample2D(base_map, transformed_texcoord);
+	float4 base = sampleBiasGlobal2D(base_map, transformed_texcoord);
 	
 	static float2 scrolling_speed = float2(u_speed, v_speed);
-	float4 color = sample2D(color_texture, transformed_texcoord + ps_total_time * scrolling_speed);
+	float4 color = sampleBiasGlobal2D(color_texture, transformed_texcoord + ps_total_time * scrolling_speed);
 
 	albedo.rgb = base.rgb * color.xyz;
 	albedo.w = base.w * color.w;
@@ -515,13 +514,12 @@ void calc_albedo_texture_from_misc_ps(
 	in float4 misc)
 {
 	float2 transformed_texcoord = transform_texcoord(texcoord, base_map_xform);
-	float4 base = sample2D(base_map, transformed_texcoord);
+	float4 base = sampleBiasGlobal2D(base_map, transformed_texcoord);
 	
-	float4 color = sample2D(color_texture, misc.xy);
+	float4 color = sampleBiasGlobal2D(color_texture, misc.xy);
 
 	albedo.rgb = base.rgb * color.xyz;
 	albedo.w = base.w * color.w;
 
 	apply_pc_albedo_modifier(albedo, normal);
 }
-

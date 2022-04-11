@@ -4,6 +4,12 @@
 #include "hlsl_constant_mapping.fx"
 #include "hlsl_vertex_types.fx"
 
+// Use this function to avoid variability of sum order inside dot(val.xyzw, 1.0f) hardware realization on XBox
+float strict_sum(in float4 val)
+{
+	return val.x + val.y + val.z + val.w;
+}
+
 float3 transform_point(in float4 position, in float4 node[3])
 {
 	float3 result;
@@ -115,7 +121,7 @@ void deform_flat_skinned(
 	out float4 local_to_world_transform[3])
 {
 	// normalize (with 1-norm) the node weights so that they sum to 1
-	float sum_of_weights = dot(vertex.node_weights.xyzw, 1.0f);
+	float sum_of_weights = strict_sum(vertex.node_weights.xyzw);
 	vertex.node_weights= vertex.node_weights/sum_of_weights;
 	
 	decompress_deform_flat_skinned(vertex);

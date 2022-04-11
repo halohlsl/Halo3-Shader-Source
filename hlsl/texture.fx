@@ -2,50 +2,61 @@
 #ifndef __TEXTURE_FX
 #define __TEXTURE_FX
 
+#ifndef PIXEL_SIZE
+#error PIXEL_SIZE should be defined!
+#endif
 
-#if defined(pc) || defined(PIXEL_SIZE)
 float4 tex2D_offset_exact(texture_sampler_2d s, const float2 texc, const float offsetx, const float offsety)
 {
-	return sample2D(s, texc + float2(offsetx, offsety) * pixel_size.xy);
+	return sample2D(s, texc + float2(offsetx, offsety) * PIXEL_SIZE.xy);
 }
-#endif
 
 float4 tex2D_offset(texture_sampler_2d s, float2 texc, const float offsetx, const float offsety)
 {
 	float4 value= 0.0f;
-#ifdef pc
 	value= tex2D_offset_exact(s, texc, offsetx, offsety);
-#else
-#ifndef VERTEX_SHADER
-	asm {
-		tfetch2D value, texc, s, MinFilter=linear, MagFilter=linear, OffsetX=offsetx, OffsetY=offsety
-	};
-#endif
-#endif
 	return value; 
 }
 
 float4 texCmp2D_offset(texture_sampler_comparison_2d s, float2 texc, const float offsetx, const float offsety, const float compareValue)
 {
 	float4 value= 0.0f;
-#if defined(pc) || !defined(VERTEX_SHADER)
-	value = sampleCmp2D(s, texc + float2(offsetx, offsety) * pixel_size.xy, compareValue);
-#endif
+	value = sampleCmp2D(s, texc + float2(offsetx, offsety) * PIXEL_SIZE.xy, compareValue);
 	return value;
 }
 
 float4 tex2D_offset_point(texture_sampler_2d s, float2 texc, const float offsetx, const float offsety)
 {
 	float4 value= 0.0f;
-#ifdef pc
 	value= tex2D_offset_exact(s, texc, offsetx, offsety);
-#else
-#ifndef VERTEX_SHADER
-	asm {
-		tfetch2D value, texc, s, MinFilter=point, MagFilter=point, OffsetX=offsetx, OffsetY=offsety
-	};
-#endif
-#endif
+
+	return value;
+}
+
+float4 tex2D_offset_exact(viewport_texture_sampler_2d s, const float2 texc, const float offsetx, const float offsety)
+{
+	return sample2D(s, texc + float2(offsetx, offsety) * PIXEL_SIZE.xy);
+}
+
+float4 tex2D_offset(viewport_texture_sampler_2d s, float2 texc, const float offsetx, const float offsety)
+{
+	float4 value = 0.0f;
+	value = tex2D_offset_exact(s, texc, offsetx, offsety);
+	return value;
+}
+
+float4 texCmp2D_offset(viewport_texture_sampler_comparison_2d s, float2 texc, const float offsetx, const float offsety, const float compareValue)
+{
+	float4 value = 0.0f;
+	value = sampleCmp2D(s, texc + float2(offsetx, offsety) * PIXEL_SIZE.xy, compareValue);
+	return value;
+}
+
+float4 tex2D_offset_point(viewport_texture_sampler_2d s, float2 texc, const float offsetx, const float offsety)
+{
+	float4 value = 0.0f;
+	value = tex2D_offset_exact(s, texc, offsetx, offsety);
+
 	return value;
 }
 
@@ -84,46 +95,8 @@ float4 calculate_weights_bspline(float4 dist)
 	return weights;
 }
 
-#ifndef pc
-#define DECLARE_TEX2D_4x4_METHOD(name, calculate_weights_func)																\
-float4 name(texture_sampler_2d s, float2 texc)																						\
-{																															\
-    float4 subpixel_dist;																									\
-    asm {																													\
-        getWeights2D subpixel_dist, texc, s																					\
-    };																														\
-  	float4 x_dist= float4(1.0f+subpixel_dist.x, subpixel_dist.x, 1.0f-subpixel_dist.x, 2.0f-subpixel_dist.x);				\
-	float4 x_weights= calculate_weights_func(x_dist);																		\
-																															\
-	float4 vert_colors[4];																									\
-	for (int y= 0; y < 4; y++)																								\
-	{																														\
-		float y_offset= y - 1.5f;																							\
-		float4 color0, color1, color2, color3;																				\
-		asm {																												\
-			tfetch2D color0, texc, s, MinFilter=point, MagFilter=point, OffsetX=-1.5, OffsetY=y_offset						\
-			tfetch2D color1, texc, s, MinFilter=point, MagFilter=point, OffsetX=-0.5, OffsetY=y_offset						\
-			tfetch2D color2, texc, s, MinFilter=point, MagFilter=point, OffsetX=+0.5, OffsetY=y_offset						\
-			tfetch2D color3, texc, s, MinFilter=point, MagFilter=point, OffsetX=+1.5, OffsetY=y_offset						\
-		};																													\
-		vert_colors[y]=	x_weights.x * color0 +																				\
-						x_weights.y * color1 +																				\
-						x_weights.z * color2 +																				\
-						x_weights.w * color3;																				\
-	}																														\
-																															\
-	float4 y_dist= float4(1.0f+subpixel_dist.y, subpixel_dist.y, 1.0f-subpixel_dist.y, 2.0f-subpixel_dist.y);				\
-	float4 y_weights= calculate_weights_func(y_dist);																		\
-																															\
-	float4 color=	y_weights.x * vert_colors[0] +																			\
-					y_weights.y * vert_colors[1] +																			\
-					y_weights.z * vert_colors[2] +																			\
-					y_weights.w * vert_colors[3];																			\
-	return color;																											\
-}
-#elif DX_VERSION == 11
 #define DECLARE_TEX2D_4x4_METHOD(name, calculate_weights_func)															\
-float4 name(texture_sampler_2d s, float2 texc)																				\
+float4 name(viewport_texture_sampler_2d s, float2 texc)																				\
 {																															\
     float2 subpixel_dist;																									\
 	uint width,height;																										\
@@ -137,10 +110,10 @@ float4 name(texture_sampler_2d s, float2 texc)																				\
 	{																														\
 		int y_offset= y - 2;																								\
 		float4 color0, color1, color2, color3;																				\
-		color0 = s.t.Sample(s.s, texc, int2(-2, y_offset));																	\
-		color1 = s.t.Sample(s.s, texc, int2(-1, y_offset));																	\
-		color2 = s.t.Sample(s.s, texc, int2(0, y_offset));																	\
-		color3 = s.t.Sample(s.s, texc, int2(1, y_offset));																	\
+		color0 = sample2Doffset(s, texc, int2(-2, y_offset));																	\
+		color1 = sample2Doffset(s, texc, int2(-1, y_offset));																	\
+		color2 = sample2Doffset(s, texc, int2(0, y_offset));																	\
+		color3 = sample2Doffset(s, texc, int2(1, y_offset));																	\
 		vert_colors[y]=	x_weights.x * color0 +																				\
 						x_weights.y * color1 +																				\
 						x_weights.z * color2 +																				\
@@ -156,9 +129,6 @@ float4 name(texture_sampler_2d s, float2 texc)																				\
 					y_weights.w * vert_colors[3];																			\
 	return color;																											\
 }
-#else  // pc
-#define DECLARE_TEX2D_4x4_METHOD(name, calculate_weights_func) float4 name(texture_sampler_2d s, float2 texc) { return 0.0f; }
-#endif // pc
 
 DECLARE_TEX2D_4x4_METHOD(tex2D_bspline, calculate_weights_bspline)
 DECLARE_TEX2D_4x4_METHOD(tex2D_bicubic, calculate_weights_bicubic)

@@ -1,29 +1,23 @@
 #line 2 "source\rasterizer\hlsl\downsample_2x2.hlsl"
 
-#define PIXEL_SIZE
-
 #include "global.fx"
 #include "hlsl_vertex_types.fx"
 #include "utilities.fx"
 #include "postprocess.fx"
 //@generate screen
 
-LOCAL_SAMPLER_2D(source_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(source_sampler, 0);
 
 float4 default_ps(screen_output IN) : SV_Target
 {
-#ifdef pc
 	float3 color= 0.00000001f;							// hack to keep divide by zero from happening on the nVidia cards
-#else
-	float3 color= 0.0f;
-#endif
 
 /*
 	// this is a 2x2 box filter, requires bilinear filtering
 	color= convert_from_bloom_buffer( tex2D_offset(source_sampler, IN.texcoord, +0, +0));
 */
-	IN.texcoord *= scale.xy;
-	IN.texcoord += scale.zw;
+	IN.texcoord *= ps_postprocess_scale.xy;
+	IN.texcoord += ps_postprocess_scale.zw;
 
 	// this is a 4x4 gaussian filter, requires bilinear filtering:   (note: this might over-blur for a 2x2 downsample in some cases)
 	//

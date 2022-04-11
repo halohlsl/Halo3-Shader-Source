@@ -9,7 +9,7 @@
 #include "spike_blur_registers.fx"
 //@generate screen
 
-LOCAL_SAMPLER_2D(source_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(source_sampler, 0);
 
 float3 get_pixel_linear_y(float2 tex_coord)		// linear in Y, point in X
 {

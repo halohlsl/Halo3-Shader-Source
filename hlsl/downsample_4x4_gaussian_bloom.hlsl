@@ -9,17 +9,13 @@
 //@generate screen
 
 
-LOCAL_SAMPLER_2D(dark_source_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(dark_source_sampler, 0);
 
 
 
 float4 default_ps(screen_output IN) : SV_Target
 {
-#ifdef pc
 	float3 color= 0.00000001f;						// hack to keep divide by zero from happening on the nVidia cards
-#else
-	float3 color= 0.0f;
-#endif
 
 	float4 sample;
 
@@ -52,28 +48,28 @@ float4 default_ps(screen_output IN) : SV_Target
 		sample.rgb *= sample.rgb * DARK_COLOR_MULTIPLIER;
 		sample_intensity= dot(sample.rgb, intensity_vector.rgb);
 		intensity += sample_intensity * 0.25f;
-		sample_curved= max(sample_intensity*scale.y, sample_intensity-scale.x);		// ###ctchou $PERF could compute both parameters with a single mad followed by max
+		sample_curved= max(sample_intensity*ps_postprocess_scale.y, sample_intensity-ps_postprocess_scale.x);		// ###ctchou $PERF could compute both parameters with a single mad followed by max
 		color += sample.rgb * sample_curved / sample_intensity;
 
 	sample= tex2D_offset(dark_source_sampler, IN.texcoord, +1, -1);
 		sample.rgb *= sample.rgb * DARK_COLOR_MULTIPLIER;
 		sample_intensity= dot(sample.rgb, intensity_vector.rgb);
 		intensity += sample_intensity * 0.25f;
-		sample_curved= max(sample_intensity*scale.y, sample_intensity-scale.x);		// ###ctchou $PERF could compute both parameters with a single mad followed by max
+		sample_curved= max(sample_intensity*ps_postprocess_scale.y, sample_intensity-ps_postprocess_scale.x);		// ###ctchou $PERF could compute both parameters with a single mad followed by max
 		color += sample.rgb * sample_curved / sample_intensity;
 
 	sample= tex2D_offset(dark_source_sampler, IN.texcoord, -1, +1);
 		sample.rgb *= sample.rgb * DARK_COLOR_MULTIPLIER;
 		sample_intensity= dot(sample.rgb, intensity_vector.rgb);
 		intensity += sample_intensity * 0.25f;
-		sample_curved= max(sample_intensity*scale.y, sample_intensity-scale.x);		// ###ctchou $PERF could compute both parameters with a single mad followed by max
+		sample_curved= max(sample_intensity*ps_postprocess_scale.y, sample_intensity-ps_postprocess_scale.x);		// ###ctchou $PERF could compute both parameters with a single mad followed by max
 		color += sample.rgb * sample_curved / sample_intensity;
 
 	sample= tex2D_offset(dark_source_sampler, IN.texcoord, +1, +1);
 		sample.rgb *= sample.rgb * DARK_COLOR_MULTIPLIER;
 		sample_intensity= dot(sample.rgb, intensity_vector.rgb);
 		intensity += sample_intensity * 0.25f;
-		sample_curved= max(sample_intensity*scale.y, sample_intensity-scale.x);		// ###ctchou $PERF could compute both parameters with a single mad followed by max
+		sample_curved= max(sample_intensity*ps_postprocess_scale.y, sample_intensity-ps_postprocess_scale.x);		// ###ctchou $PERF could compute both parameters with a single mad followed by max
 		color += sample.rgb * sample_curved / sample_intensity;
 
 	color= color / 4.0f;
@@ -94,7 +90,7 @@ float4 default_ps(screen_output IN) : SV_Target
 	float intensity= dot(color.rgb, intensity_vector.rgb);					// max(max(color.r, color.g), color.b);
 	
 	// calculate bloom curve intensity
-	float bloom_intensity= max(intensity*scale.y, intensity-scale.x);		// ###ctchou $PERF could compute both parameters with a single mad followed by max
+	float bloom_intensity= max(intensity*ps_postprocess_scale.y, intensity-ps_postprocess_scale.x);		// ###ctchou $PERF could compute both parameters with a single mad followed by max
 	
 	// calculate bloom color
 	float3 bloom_color= color * (bloom_intensity / intensity);

@@ -7,7 +7,7 @@
 #include "shield_meter_registers.fx"
 //@generate screen
 
-LOCAL_SAMPLER_2D(source_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(source_sampler, 0);
 
 //float4 gradient_min_color; // get from HUD cuscolor2
 //float4 gradient_max_color; // get from HUD cuscolor3
@@ -80,6 +80,6 @@ float4 default_ps(screen_output IN) : SV_Target
 	//---
 	//SRCCOLOR= R0*T0a
 	//SRCALPHA= R0a	
-	float result_alpha= t0.a*scale.w;
+	float result_alpha= t0.a*ps_postprocess_scale.w;
 	return float4(r0.r*t0.a, r0.g*t0.a, r0.b*t0.a, result_alpha);
 }

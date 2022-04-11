@@ -11,9 +11,9 @@
 #define SAMPLE_PERCENTAGE_CLOSER sample_percentage_closer_PCF_3x3_block
 #endif // SAMPLE_PERCENTAGE_CLOSER
 
-LOCAL_SAMPLER_2D(zbuffer, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_ALLWAYS(zbuffer, 0);
 LOCAL_SAMPLER_2D(shadow, 1);
-LOCAL_SAMPLER_2D(normal_buffer, 2);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_ALLWAYS(normal_buffer, 2);
 
 #define CAMERA_TO_SHADOW_PROJECTIVE_X p_lighting_constant_0
 #define CAMERA_TO_SHADOW_PROJECTIVE_Y p_lighting_constant_1
@@ -42,10 +42,8 @@ LOCAL_SAMPLER_2D(normal_buffer, 2);
 #define DARK_COLOR_MULTIPLIER g_exposure.g
 #include "render_target.fx"
 
-
-#ifdef pc
-static const float2 pixel_size= float2(1.0/512.0f, 1.0/512.0f);		// shadow pixel size ###ctchou $TODO THIS NEEDS TO BE PASSED IN!!!  good thing we don't care about PC...
-#endif
+static const float2 g_shadow_pixel_size= float2(1.0/512.0f, 1.0/512.0f);		// shadow pixel size ###ctchou $TODO THIS NEEDS TO BE PASSED IN!!!  good thing we don't care about PC...
+#define PIXEL_SIZE g_shadow_pixel_size
 #include "texture.fx"
 
 
@@ -86,14 +84,8 @@ float sample_percentage_closer_PCF_3x3_block(float3 fragment_shadow_position, fl
 	
 //#ifdef BILINEAR_SHADOWS
 #ifndef VERTEX_SHADER
-   #ifdef pc
-      float2 frac_pos = fragment_shadow_position.xy / pixel_size;
-      blend.xy = frac(frac_pos);
-   #else
-	   asm {
-		   getWeights2D blend.xy, fragment_shadow_position.xy, shadow, MagFilter=linear, MinFilter=linear, OffsetX=0.5, OffsetY=0.5
-	   };
-   #endif
+	float2 frac_pos = fragment_shadow_position.xy / g_shadow_pixel_size;
+	blend.xy = frac(frac_pos);
 	blend.zw= 1.0f - blend.xy;
 	scale = 1.0f / 4.0f;
 #endif // VERTEX_SHADER
@@ -122,19 +114,10 @@ float sample_percentage_closer_PCF_3x3_block(float3 fragment_shadow_position, fl
 accum_pixel default_ps(
 	SCREEN_POSITION_INPUT(pixel_pos))
 {
-#ifdef pc
-	float2 texture_pos= transform_texcoord(pixel_pos.xy, zbuffer_xform);
-#else
-	pixel_pos.xy += p_tiling_vpos_offset.xy;
-	float2 texture_pos= transform_texcoord(pixel_pos.xy, zbuffer_xform);
-#endif
+	float2 texture_pos= pixel_pos.xy;
 
-	float pixel_depth= sample2D(zbuffer, texture_pos).r;
-#if defined(pc) && (DX_VERSION == 9)
-	pixel_depth = -pixel_depth;
-#else 
+	float pixel_depth= zbuffer.t.Load(int3(texture_pos, 0)).r;
 	pixel_depth = 1.0f / (pixel_depth * ZBUFFER_SCALE + ZBUFFER_BIAS);					// convert to 'true' depth		(z)
-#endif
 
 	// calculate projected screen position
 	float4 screen_position= float4(transform_texcoord(pixel_pos.xy, screen_xform) * pixel_depth, pixel_depth, 1.0f);
@@ -165,7 +148,7 @@ accum_pixel default_ps(
    //sh_res = sh_res > texel.z;
    //return convert_to_render_target(float4(sh_res, 0.0, 0.0, 0.0), false, true);
 
-	float3 normal_world_space= sample2D(normal_buffer, texture_pos).xyz * 2.0f - 1.0f;										// ###ctchou $PERF bias this in the texture format
+	float3 normal_world_space= normal_buffer.t.Load(int3(texture_pos, 0)).xyz * 2.0f - 1.0f;										// ###ctchou $PERF bias this in the texture format
 	float cosine= dot(normal_world_space, SHADOW_DIRECTION_WORLDSPACE.xyz);
 
 	float shadow_falloff= saturate(fragment_shadow_projected.z*2-1);													// shift z-depth falloff to bottom half of the shadow volume (no depth falloff in top half)
@@ -277,11 +260,8 @@ accum_pixel albedo_ps(
 #ifndef pc	
 	pixel_pos.xy += p_tiling_vpos_offset.xy;
 #endif	
-	float2 texture_pos= transform_texcoord(pixel_pos.xy, zbuffer_xform);	
-	float pixel_depth= sample2D(zbuffer, texture_pos).r; // todo: do we need to transform this depth? [11/15/2012 paul.smirnov]
-#if defined(pc) && (DX_VERSION == 9)
-	pixel_depth = -(1 / pixel_depth + ZBUFFER_BIAS) / ZBUFFER_SCALE;
-#endif	
+	float2 texture_pos= pixel_pos.xy;	
+	float pixel_depth= zbuffer.t.Load(int3(texture_pos, 0)).r; // todo: do we need to transform this depth? [11/15/2012 paul.smirnov]
 	float4 world_position= float4(transform_texcoord(pixel_pos.xy, screen_xform), pixel_depth, 1.0f);
 	world_position= mul(world_position, view_inverse_matrix);
 	world_position.xyz/= world_position.w;
@@ -336,7 +316,7 @@ accum_pixel albedo_ps(
 		percentage_closer*= 1.0f - darken * influence;
 	}
 
-	float3 normal_world_space= sample2D(normal_buffer, texture_pos).xyz * 2.0f - 1.0f;										// ###ctchou $PERF bias this in the texture format
+	float3 normal_world_space= normal_buffer.t.Load(int3(texture_pos, 0)).xyz * 2.0f - 1.0f;										// ###ctchou $PERF bias this in the texture format
 	float cosine= dot(normal_world_space, SHADOW_DIRECTION_WORLDSPACE.xyz);
 	float shadow_darkness= k_ps_constant_shadow_alpha.r * saturate(0.6f + 0.4f * cosine);			// z_depth_falloff= 1 - (shifted_depth)^4,    incident_falloff= cosine lobe
 

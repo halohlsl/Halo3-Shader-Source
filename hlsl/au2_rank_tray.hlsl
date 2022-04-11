@@ -11,7 +11,7 @@
 #include "postprocess.fx"
 //@generate screen
 
-LOCAL_SAMPLER_2D(source_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(source_sampler, 0);
 
 float4 default_ps(screen_output IN) : SV_Target
 {
@@ -32,5 +32,5 @@ float4 default_ps(screen_output IN) : SV_Target
 	// apply input color (nescessary to get UI animations)
  	color*= IN.color;
  	
- 	return color*scale;
+ 	return color*ps_postprocess_scale;
 }

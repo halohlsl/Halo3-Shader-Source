@@ -76,7 +76,7 @@ chud_output_cortana default_vs(vertex_type IN)
 
 float4 huesat(float4 in_color)
 {
-	return float4(mul(float4(in_color.x, in_color.y, in_color.z, 1.0f), p_postprocess_hue_saturation_matrix), 1.0);
+	return float4(mul(float4(in_color.x, in_color.y, in_color.z, 1.0f), ps_postprocess_hue_saturation_matrix), 1.0);
 }
 
 float4 thresh(float4 in_color)

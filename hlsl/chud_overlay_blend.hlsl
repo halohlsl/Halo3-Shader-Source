@@ -10,9 +10,9 @@
 //@generate screen
 
 
-LOCAL_SAMPLER_2D(original_sampler, 0);
-LOCAL_SAMPLER_2D(add_sampler, 1);
-LOCAL_SAMPLER_2D(chud_overlay, 2);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(original_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(add_sampler, 1);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(chud_overlay, 2);
 
 
 float4 default_ps(screen_output IN) : SV_Target
@@ -22,7 +22,7 @@ float4 default_ps(screen_output IN) : SV_Target
 	float4 chud= sample2D(chud_overlay, IN.texcoord);
 
 	float4 color;
-	color.rgb= scale.rgb * original.rgb * chud.a + add.rgb + chud.rgb;
+	color.rgb= ps_postprocess_scale.rgb * original.rgb * chud.a + add.rgb + chud.rgb;
 	color.a= chud.a;
 	
 	return color;	

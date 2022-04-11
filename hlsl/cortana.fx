@@ -88,7 +88,7 @@ float4 calc_detail_multilayer_ps(
 	float depth_intensity= 1.0f;
 	for (int x= 0; x < layer_count; x++)
 	{
-		accum += depth_intensity * sample2D(detail_map, texcoord);
+		accum += depth_intensity * sampleBiasGlobal2D(detail_map, texcoord);
 		texcoord -= offset;	depth_intensity *= depth_darken;
 	}
 	accum.rgba /= layer_count;
@@ -113,12 +113,12 @@ void calc_albedo_cortana_ps(
 	in float2 fragment_position,
 	out float4 albedo)
 {
-	float4	base=		sample2D(base_map,		transform_texcoord(texcoord, base_map_xform)) * albedo_color;
+	float4	base=		sampleBiasGlobal2D(base_map,		transform_texcoord(texcoord, base_map_xform)) * albedo_color;
 	
 	// sample scanlines
 	float2 scanline_texcoord = fragment_position;
 	scanline_texcoord /= 1.5f;	// account for 1280x720 -> 1920x1080 difference - really should pass a constant with the screen size
-	float4 scanline= sample2D(scanline_map, transform_texcoord(scanline_texcoord, scanline_map_xform));
+	float4 scanline= sampleBiasGlobal2D(scanline_map, transform_texcoord(scanline_texcoord, scanline_map_xform));
 	float scanline_amount= lerp(scanline_amount_transparent, scanline_amount_opaque, base.w);
 	scanline= lerp(float4(1.0f, 1.0f, 1.0f, 1.0f), scanline, scanline_amount);
 	base.rgb *= scanline.rgb;		// * base.w
@@ -588,7 +588,7 @@ accum_pixel active_camo_ps(
 	// grab screen position
 	float2 uv = float2((vsout.position.x + 0.5f) / texture_size.x, (vsout.position.y + 0.5f) / texture_size.y);
 	
-	float transparency = sample2D(fade_gradient_map, transform_texcoord(vsout.texcoord.xy, fade_gradient_map_xform)).a * fade_gradient_scale + vsout.inscatter.w;
+	float transparency = sampleBiasGlobal2D(fade_gradient_map, transform_texcoord(vsout.texcoord.xy, fade_gradient_map_xform)).a * fade_gradient_scale + vsout.inscatter.w;
 	
 	float2 uvdelta = vsout.perturb.xy * warp_amount * saturate(transparency + warp_fade_offset) * float2(1.0f / 16.0f, 1.0f / 9.0f);
 	
@@ -670,6 +670,6 @@ albedo_pixel albedo_ps(
 	// do alpha test
 	calc_alpha_test_ps(vsout.texcoord, output_alpha);
 
-	float4 base = sample2D(base_map, transform_texcoord(vsout.texcoord, base_map_xform)) * albedo_color;
+	float4 base = sampleBiasGlobal2D(base_map, transform_texcoord(vsout.texcoord, base_map_xform)) * albedo_color;
 	return convert_to_albedo_target(base, vsout.normal.xyz, vsout.normal.w);
 }

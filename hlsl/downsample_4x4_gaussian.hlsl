@@ -6,7 +6,7 @@
 #include "postprocess.fx"
 //@generate screen
 
-LOCAL_SAMPLER_2D(source_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(source_sampler, 0);
 
 float4 default_ps(screen_output IN) : SV_Target				// ###ctchou $TODO $PERF convert this to tex2D_offset, and do a gaussian filter greater than 4x4 kernel (cheap cuz we only use it on the smaller size textures)
 {

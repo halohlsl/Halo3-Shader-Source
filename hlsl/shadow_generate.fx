@@ -65,10 +65,8 @@ void shadow_generate_ps(
 #define PCF_WIDTH 4
 #define PCF_HEIGHT 4
 
-#ifdef pc
-static const float2 pixel_size= float2(1.0/512.0f, 1.0/512.0f);		// ###ctchou $TODO THIS NEEDS TO BE PASSED IN!!!
-#endif
-
+static const float2 g_shadow_pixel_size = float2(1.0/512.0f, 1.0/512.0f);		// ###ctchou $TODO THIS NEEDS TO BE PASSED IN!!!
+#define PIXEL_SIZE g_shadow_pixel_size
 #include "texture.fx"
 
 

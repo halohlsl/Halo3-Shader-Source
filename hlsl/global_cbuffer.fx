@@ -21,19 +21,30 @@
 #define SHADER_CONST_ALIAS(_buffer, _type, _hlsl_name, _hlsl_def, _c_name, _c_def, _c_offset) static _type _hlsl_name = _hlsl_def;
 
 #define _TEXTURETYPE_2D texture2D<float4>
+#define _TEXTURETYPE_2D_VIEWPORT texture2D<float4>
+#define _TEXTURETYPE_2D_RW RWTexture2D<float4>
+#define _TEXTURETYPE_2D_HALF texture2D<min16float4>
+#define _TEXTURETYPE_2D_RW_HALF RWTexture2D<min16float4>
 #define _TEXTURETYPE_2D_ARRAY Texture2DArray<float4>
 #define _TEXTURETYPE_3D texture3D<float4>
 #define _TEXTURETYPE_CUBE TextureCube<float4>
 #define _TEXTUREANDSAMPLERTYPE_2D texture_sampler_2d
+#define _TEXTUREANDSAMPLERTYPE_2D_HALF texture_sampler_2d_half
+#define _TEXTUREANDSAMPLERTYPE_2D_VIEWPORT viewport_texture_sampler_2d
 #define _TEXTUREANDSAMPLERTYPE_2D_ARRAY texture_sampler_2d_array
 #define _TEXTUREANDSAMPLERTYPE_3D texture_sampler_3d
 #define _TEXTUREANDSAMPLERTYPE_CUBE texture_sampler_cube
 #define _SAMPLER(_name, _slot) sampler _name : register(s##_slot);
 #define _TEXTURE(_type, _name, _slot) _TEXTURETYPE##_type _name : register(t##_slot);
+#define _TEXTURE_UAV(_type, _name, _slot) _TEXTURETYPE##_type _name : register(u##_slot);
 #define _TEXTURE_AND_SAMPLER(_type, _name, _slot)										\
 	_SAMPLER(GlobalSampler_##_name, _slot)												\
 	_TEXTURE(_type, GlobalTexture_##_name, _slot)										\
 	static _TEXTUREANDSAMPLERTYPE##_type _name={ GlobalSampler_##_name, GlobalTexture_##_name };
+#define _TEXTURE_AND_SAMPLER_IN_VIEWPORT(_type, _name, _slot, _with_viewport)										\
+	_SAMPLER(GlobalSampler_##_name, _slot)												\
+	_TEXTURE(_type, GlobalTexture_##_name, _slot)										\
+	static _TEXTUREANDSAMPLERTYPE##_type _name={ GlobalSampler_##_name, GlobalTexture_##_name, _with_viewport };
 #define _TEXTURE_USING_SAMPLER(_type, _name, _slot, _sampler)							\
 	_TEXTURE(_type, GlobalTexture_##_name, _slot)												\
 	static _TEXTUREANDSAMPLERTYPE##_type _name={ _sampler, GlobalTexture_##_name };
@@ -44,6 +55,7 @@
 #define VERTEX_TEXTURE_USING_SAMPLER(_type, _hlsl_name, _c_name, _slot, _sampler) _TEXTURE_USING_SAMPLER(_type, _hlsl_name, _slot, _sampler)
 
 #define PIXEL_TEXTURE_AND_SAMPLER(_type, _hlsl_name, _c_name, _slot) _TEXTURE_AND_SAMPLER(_type, _hlsl_name, _slot)
+#define PIXEL_TEXTURE_AND_SAMPLER_IN_VIEWPORT_ALWAYS(_type, _hlsl_name, _c_name, _slot) _TEXTURE_AND_SAMPLER_IN_VIEWPORT(_type, _hlsl_name, _slot, true)
 #define PIXEL_SAMPLER(_hlsl_name, _c_name, _slot) _SAMPLER(_hlsl_name, _slot)
 #define PIXEL_TEXTURE(_type, _hlsl_name, _c_name, _slot) _TEXTURE(_type, _hlsl_name, _slot)
 #define PIXEL_TEXTURE_USING_SAMPLER(_type, _hlsl_name, _c_name, _slot, _sampler) _TEXTURE_USING_SAMPLER(_type, _hlsl_name, _slot, _sampler)
@@ -51,6 +63,7 @@
 #define COMPUTE_TEXTURE_AND_SAMPLER(_type, _hlsl_name, _c_name, _slot) _TEXTURE_AND_SAMPLER(_type, _hlsl_name, _slot)
 #define COMPUTE_SAMPLER(_hlsl_name, _c_name, _slot) _SAMPLER(_hlsl_name, _slot)
 #define COMPUTE_TEXTURE(_type, _hlsl_name, _c_name, _slot) _TEXTURE(_type, _hlsl_name, _slot)
+#define COMPUTE_TEXTURE_UAV(_type, _hlsl_name, _c_name, _slot) _TEXTURE_UAV(_type, _hlsl_name, _slot)
 #define COMPUTE_TEXTURE_USING_SAMPLER(_type, _hlsl_name, _c_name, _slot, _sampler) _TEXTURE_USING_SAMPLER(_type, _hlsl_name, _slot, _sampler)
 
 #define EMIT_PAD_ELEMENT_1(_type,_name) _type##3 _name##_pad;

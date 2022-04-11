@@ -91,7 +91,7 @@ accum_pixel default_ps(
 //#define selection_curve p_lighting_constant_2
 //#define selection_color p_lighting_constant_3
 
-	float4 diffuse_albedo= sample2D(diffuse_texture, texcoord);
+	float4 diffuse_albedo= sampleBiasGlobal2D(diffuse_texture, texcoord);
 	clip(diffuse_albedo.a - k_decorator_alpha_test_threshold);				// alpha test
 	
 	float4 color= diffuse_albedo * pc_ambient_light * g_exposure.rrrr;
@@ -342,7 +342,7 @@ default_ps(
    inscatter.w= 0;
 #endif // pc
 
-	texcoord= sample2D(diffuse_texture, texcoord.xy);								// ###HACK warning: I should use a new variable to hold the albedo sample, but re-using texcoord makes the stupid HLSL compiler generate one less GPR
+	texcoord= sampleBiasGlobal2D(diffuse_texture, texcoord.xy);								// ###HACK warning: I should use a new variable to hold the albedo sample, but re-using texcoord makes the stupid HLSL compiler generate one less GPR
 	
 	float4 color= texcoord * light + inscatter;
 

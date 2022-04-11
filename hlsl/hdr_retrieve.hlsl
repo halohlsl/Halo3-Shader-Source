@@ -5,7 +5,7 @@
 
 //@generate screen
 
-LOCAL_SAMPLER_2D(source_sampler, 0);
+LOCAL_SAMPLER_2D_IN_VIEWPORT_MAYBE(source_sampler, 0);
 
 #define HDR_RETRIEVE_TEX_SIZE 256
 
