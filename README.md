@@ -6,6 +6,4 @@ These source files are needed to compile shaders using tool. Clone the repo into
 
 Use the compile-shaders verb with tool to write new .vertex_shader and .pixel_shader files.
 
-[Looking for the enhanced branch?](https://github.com/0xfedfedfe/Halo3-Shader-Source/tree/enhanced)
-
-[Premade render method options for the enhanced branch](https://discord.gg/aKQCDmQjYN)
+[Halo HLSL Discord](https://discord.gg/aKQCDmQjYN)
