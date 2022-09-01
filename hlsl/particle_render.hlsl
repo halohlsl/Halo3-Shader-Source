@@ -860,7 +860,7 @@ float compute_depth_fade(float2 screen_coords, float depth, float range)
 	float scene_depth = 1.0f - depth_buffer.Load(int3(
 		(TEST_CATEGORY_OPTION(specialized_rendering, none) ?
 			screen_coords.xy :
-			calc_viewport_pixel_coords_from_pixel_coords(screen_coords.xy))
+			calc_viewport_pixel_coords_from_global_pixel_coords(screen_coords.xy))
 		, 0)).x;
 	scene_depth= 1.0f / (depth_constants.x + scene_depth * depth_constants.y);	// convert to real depth
 

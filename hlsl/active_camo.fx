@@ -37,7 +37,8 @@ accum_pixel active_camo_ps(
 	in float4 texcoord : TEXCOORD1,
 	in float4 perturb : TEXCOORD0) : SV_Target
 {
-	float2 uv= float2((screen_position.x + 0.5f) / texture_size.x, (screen_position.y + 0.5f) / texture_size.y);
+	float2 global_screen_position = calc_global_pixel_coords_from_viewport_pixel_coords(screen_position.xy);
+	float2 uv= float2((global_screen_position.x + 0.5f) / texture_size.x, (global_screen_position.y + 0.5f) / texture_size.y);
 	
 	// ###kuttas $TODO: expose these "magic" constants to artists for direct control via the tag
 	float2 uvdelta;

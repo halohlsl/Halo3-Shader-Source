@@ -42,6 +42,7 @@ DECLARE_IN_VIEWPORT_FLAG(31);
 
 static float2 ps_global_viewport_top_left_uv = ps_global_viewport_top_left_pixel * ps_global_render_pixel_size;
 static float4 ps_global_viewport_bounds_pixel = float4(ps_global_viewport_top_left_pixel + float2(0.5f, 0.5f), ps_global_viewport_top_left_pixel + ps_global_viewport_res - float2(0.5f, 0.5f));
+static float2 ps_global_viewport_reciprocal_res_multipliers = 1.0 / ps_global_viewport_res_multipliers;
 
 float2 calc_global_uv(float2 global_pixel_coords)
 {
@@ -58,9 +59,14 @@ float2 calc_viewport_pixel_coords_from_uv(float2 global_uv)
 	return clamp(ps_global_viewport_top_left_pixel + global_uv * ps_global_viewport_res, ps_global_viewport_bounds_pixel.xy, ps_global_viewport_bounds_pixel.zw);
 }
 
-float2 calc_viewport_pixel_coords_from_pixel_coords(float2 global_pixel_coords)
+float2 calc_viewport_pixel_coords_from_global_pixel_coords(float2 global_pixel_coords)
 {
 	return clamp(ps_global_viewport_top_left_pixel + global_pixel_coords * ps_global_viewport_res_multipliers, ps_global_viewport_bounds_pixel.xy, ps_global_viewport_bounds_pixel.zw);
+}
+
+float2 calc_global_pixel_coords_from_viewport_pixel_coords(float2 viewport_pixel_coords)
+{
+	return clamp((viewport_pixel_coords - ps_global_viewport_top_left_pixel) * ps_global_viewport_reciprocal_res_multipliers, float2(0.0, 0.0), ps_global_render_resolution);
 }
 
 

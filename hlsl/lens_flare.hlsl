@@ -62,7 +62,17 @@ float4 default_ps(
 	in float2 texcoord : TEXCOORD0) : SV_Target
 {
  	float4 color= sample2D(source_sampler, texcoord);
-	float4 color_to_nth = pow(legacy_h3_flares ? color : color.gggg, modulation_factor.y); // gamma-enhanced monochrome channel to generate 'hot' white centers in new flares
+	float4 color_to_nth;
+
+	if (legacy_h3_flares)
+	{
+		color_to_nth = pow(color, modulation_factor.y) * color;
+	}
+	else
+	{
+		color_to_nth = pow(color.gggg, modulation_factor.y);
+	}
+
 	float4 outColor = (color_to_nth * modulation_factor.x) + (color * tint_color); // color tinted external areas for cool exterior
 
  	float brightness = tint_color.a * ILLUM_EXPOSURE * ps_postprocess_scale.r * modulation_factor.z;

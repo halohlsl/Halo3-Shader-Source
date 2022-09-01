@@ -664,8 +664,9 @@ accum_pixel water_shading(s_water_interpolators INTERPOLATORS)
 	texcoord_ss.y = 1 - texcoord_ss.y;
 	texcoord_ss = k_water_player_view_constant.xy + texcoord_ss * k_water_player_view_constant.zw;
 
+	float depth_water_fake = 0;// INTERPOLATORS.position_ss.z can be used for more transparent underwater, but it looks more different from legacy
 	//	get current pixel depth
-	float depth_water = depth_buffer.Load(int3(calc_viewport_pixel_coords_from_uv(texcoord_ss), 0)).r;
+	float depth_water = k_is_camera_underwater ? depth_water_fake : depth_buffer.Load(int3(calc_viewport_pixel_coords_from_uv(texcoord_ss), 0)).r;
 
 	if (depth_water > INTERPOLATORS.position.z)
 	{
@@ -826,7 +827,7 @@ accum_pixel water_shading(s_water_interpolators INTERPOLATORS)
 		float2 delta= 0.001f;	//###xwan avoid fetch back pixel, it could be considered into k_water_player_view_constant
 		texcoord_refraction= clamp(texcoord_refraction, k_water_player_view_constant.xy+delta, k_water_player_view_constant.xy+k_water_player_view_constant.zw-delta);
 
-		depth_refraction = depth_buffer.Load(int3(calc_viewport_pixel_coords_from_uv(texcoord_refraction), 0)).r;
+		depth_refraction = k_is_camera_underwater ? depth_water_fake : depth_buffer.Load(int3(calc_viewport_pixel_coords_from_uv(texcoord_refraction), 0)).r;
 #if (DX_VERSION == 9) && defined(pc)
 		depth_refraction = k_water_view_depth_constant.x / depth_refraction + k_water_view_depth_constant.y; // Zbuf = -FN/(F-N) / z + F/(F-N)
 #endif // pc
@@ -846,7 +847,7 @@ accum_pixel water_shading(s_water_interpolators INTERPOLATORS)
 		color_refraction_bed= color_refraction;	//	pure color of under water stuff
 
 		//	check real refraction
-		depth_refraction = depth_buffer.Load(int3(calc_viewport_pixel_coords_from_uv(texcoord_refraction), 0)).r;
+		depth_refraction = k_is_camera_underwater ? depth_water_fake : depth_buffer.Load(int3(calc_viewport_pixel_coords_from_uv(texcoord_refraction), 0)).r;
 
 #if (DX_VERSION == 9) && defined(pc)
 		depth_refraction = k_water_view_depth_constant.x / depth_refraction + k_water_view_depth_constant.y; // Zbuf = -FN/(F-N) / z + F/(F-N)
