@@ -12,7 +12,7 @@ LOCAL_SAMPLER_CUBE(source_sampler, 0);
 
 struct screen_output
 {
-	float4 position	:POSITION;
+	float4 position	:SV_Position;
 	float2 texcoord	:TEXCOORD0;
 };
 

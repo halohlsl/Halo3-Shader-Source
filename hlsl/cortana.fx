@@ -117,7 +117,7 @@ void calc_albedo_cortana_ps(
 	
 	// sample scanlines
 	float2 scanline_texcoord = fragment_position;
-	scanline_texcoord /= 1.5f;	// account for 1280x720 -> 1920x1080 difference - really should pass a constant with the screen size
+	scanline_texcoord /= 1.5f * (ps_global_render_resolution.y / 720);
 	float4 scanline= sampleBiasGlobal2D(scanline_map, transform_texcoord(scanline_texcoord, scanline_map_xform));
 	float scanline_amount= lerp(scanline_amount_transparent, scanline_amount_opaque, base.w);
 	scanline= lerp(float4(1.0f, 1.0f, 1.0f, 1.0f), scanline, scanline_amount);

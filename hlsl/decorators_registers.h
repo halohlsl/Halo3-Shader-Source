@@ -25,7 +25,7 @@
 
 #define FX_FILE "rasterizer\\hlsl\\decorators_registers.fx"
 #include "rasterizer\dx11\rasterizer_dx11_define_fx_constants.h"
-#undef FX_FIL
+#undef FX_FILE
 
 #endif
 
